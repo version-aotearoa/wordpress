@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Frontend User Registration
  * Description: Front-end registration and magic-link login for Members, with custom fields, admin approval, and Members-only access control.
- * Version:     1.1.4
+ * Version:     1.1.5
  * Author:      Frontend User Registration
  * License:     GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -11,7 +11,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'FEUR_VERSION', '1.1.4' );
+define( 'FEUR_VERSION', '1.1.5' );
 define( 'FEUR_FILE', __FILE__ );
 define( 'FEUR_PATH', plugin_dir_path( __FILE__ ) );
 define( 'FEUR_URL', plugin_dir_url( __FILE__ ) );

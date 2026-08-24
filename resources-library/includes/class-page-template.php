@@ -16,35 +16,6 @@ class RL_Page_Template {
 		add_shortcode( 'resources_library', array( $this, 'shortcode' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'assets' ) );
 		add_action( 'save_post_page', array( __CLASS__, 'clear_library_url' ) );
-		add_action( 'template_redirect', array( $this, 'member_restrict' ), 5 );
-	}
-
-	public function member_restrict() {
-		if ( ! class_exists( 'FEUR_Plugin' ) || ! class_exists( 'FEUR_Role' ) || ! class_exists( 'FEUR_Page_Installer' ) ) {
-			return;
-		}
-		$restricted = (array) FEUR_Plugin::get_setting( 'restricted_post_types', array() );
-		if ( ! in_array( RL_Plugin::PT, $restricted, true ) ) {
-			return;
-		}
-		if ( FEUR_Role::has_member_access() ) {
-			return;
-		}
-		if ( ! is_page() ) {
-			return;
-		}
-		$is_library = ( get_page_template_slug() === self::TEMPLATE );
-		if ( ! $is_library ) {
-			$page_id = get_queried_object_id();
-			$content = $page_id ? get_post_field( 'post_content', $page_id ) : '';
-			$is_library = $content && has_shortcode( $content, 'resources_library' );
-		}
-		if ( ! $is_library ) {
-			return;
-		}
-		$url = add_query_arg( array( 'redirect_to' => get_permalink(), 'fe_status' => 'members_only' ), FEUR_Page_Installer::get_url() );
-		wp_safe_redirect( $url );
-		exit;
 	}
 
 	public function shortcode( $atts = array() ) {

@@ -97,10 +97,23 @@
 
 	if (window.jQuery) {
 		window.jQuery(function ($) {
-			$(document).on('sortstart', '.meta-box-sortables', function (e, ui) {
-				if (ui.item.is('#rl_tags_box, #rl_formats_box, #rl_library_options')) {
-					$(this).sortable('cancel');
+			var TARGET = '#rl_tags_box, #rl_formats_box, #rl_library_options';
+			function blockDrag(container) {
+				var sortable = $(container).data('ui-sortable') || $(container).data('sortable');
+				if (!sortable || !sortable.options) {
+					return;
 				}
+				var cur = sortable.options.cancel || '';
+				if (cur && cur.indexOf('#rl_tags_box') !== -1) {
+					return;
+				}
+				sortable.options.cancel = cur ? cur + ', ' + TARGET : TARGET;
+			}
+			$(document).on('sortcreate', '.meta-box-sortables', function () {
+				blockDrag(this);
+			});
+			$(document).on('mouseenter', '.meta-box-sortables', function () {
+				blockDrag(this);
 			});
 		});
 	}

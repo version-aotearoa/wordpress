@@ -4,7 +4,7 @@ Tags: registration, members, magic login, user fields
 Requires at least: 5.8
 Tested up to: 6.6
 Requires PHP: 7.4
-Stable tag: 1.1.4
+Stable tag: 1.1.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -43,6 +43,9 @@ New accounts are created with the Members role. If admin approval is enabled, th
 Yes. Under Users -> Registration -> Settings, enable the "Members only" toggle for any public post type. Non-members are redirected to the account page.
 
 == Changelog ==
+
+= 1.1.5 =
+* New "Member content page" setting (Member Access): choose an existing page or create one that is restricted to logged-in Members; non-members are redirected to the login page as before.
 
 = 1.1.4 =
 * Fixed Deny actually approving members: denied members now have a distinct Denied status and cannot log in.

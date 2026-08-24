@@ -68,6 +68,7 @@ class FEUR_Admin_Menu {
 
 		add_settings_section( 'feur_access', __( 'Member Access', 'feur' ), array( $this, 'access_section_text' ), 'feur-settings' );
 		add_settings_field( 'restricted_post_types', __( 'Members-only content', 'feur' ), array( $this, 'field_restricted_post_types' ), 'feur-settings', 'feur_access' );
+		add_settings_field( 'access_page', __( 'Member content page', 'feur' ), array( $this, 'field_access_page' ), 'feur-settings', 'feur_access' );
 	}
 
 	public function access_section_text() {
@@ -137,6 +138,23 @@ class FEUR_Admin_Menu {
 		echo '<p class="description">' . esc_html__( 'Content of these types is visible only to logged-in Members. Everyone else is redirected to the account page.', 'feur' ) . '</p>';
 	}
 
+	public function field_access_page() {
+		$current = (int) FEUR_Plugin::get_setting( 'access_page_id', 0 );
+		echo '<select name="feur_settings[access_page_id]">';
+		echo '<option value="0"' . selected( $current, 0, false ) . '>' . esc_html__( 'No page (content-type restriction only)', 'feur' ) . '</option>';
+		$pages = get_pages( array( 'sort_column' => 'menu_order, post_title' ) );
+		foreach ( $pages as $page ) {
+			$id = (int) $page->ID;
+			$permalink = get_permalink( $id );
+			$label = $page->post_title . ( $permalink ? ' (' . $permalink . ')' : '' );
+			echo '<option value="' . esc_attr( $id ) . '"' . selected( $current, $id, false ) . '>' . esc_html( $label ) . '</option>';
+		}
+		echo '</select>';
+		echo '<p><label for="feur_access_page_new">' . esc_html__( 'Or create a new page:', 'feur' ) . '</label> ';
+		echo '<input type="text" id="feur_access_page_new" name="feur_settings[access_page_new]" value="" class="regular-text" placeholder="' . esc_attr__( 'Page title', 'feur' ) . '" /></p>';
+		echo '<p class="description">' . esc_html__( 'Non-members are redirected to the login page when they visit this page. Choose the page where member content is accessed, or create one.', 'feur' ) . '</p>';
+	}
+
 	private function field_checkbox( $key, $label ) {
 		$value = (bool) FEUR_Plugin::get_setting( $key );
 		echo '<label>';
@@ -176,6 +194,24 @@ class FEUR_Admin_Menu {
 			}
 		}
 		$settings['restricted_post_types'] = $restricted;
+
+		$access_page_id = isset( $input['access_page_id'] ) ? absint( $input['access_page_id'] ) : 0;
+		$access_page_new = isset( $input['access_page_new'] ) ? trim( sanitize_text_field( $input['access_page_new'] ) ) : '';
+		if ( '' !== $access_page_new ) {
+			$created = wp_insert_post(
+				array(
+					'post_type'   => 'page',
+					'post_status' => 'publish',
+					'post_title'  => $access_page_new,
+				)
+			);
+			if ( ! is_wp_error( $created ) && $created ) {
+				$access_page_id = (int) $created;
+			}
+		} elseif ( $access_page_id && 'page' !== get_post_type( $access_page_id ) ) {
+			$access_page_id = 0;
+		}
+		$settings['access_page_id'] = $access_page_id;
 
 		return $settings;
 	}

@@ -16,6 +16,7 @@ final class FEUR_Plugin {
 		'magic_link_email_enabled' => 1,
 		'deny_email_enabled'       => 1,
 		'restricted_post_types'    => array(),
+		'access_page_id'           => 0,
 	);
 
 	private function __construct() {

@@ -24,6 +24,14 @@ class FEUR_Member_Access {
 		if ( get_queried_object_id() === FEUR_Page_Installer::get_page_id() ) {
 			return;
 		}
+
+		$access_page_id = (int) FEUR_Plugin::get_setting( 'access_page_id', 0 );
+		if ( $access_page_id && is_page( $access_page_id ) ) {
+			$url = add_query_arg( array( 'redirect_to' => get_permalink(), 'fe_status' => 'members_only' ), FEUR_Page_Installer::get_url() );
+			wp_safe_redirect( $url );
+			exit;
+		}
+
 		$types = $this->restricted_types();
 		if ( empty( $types ) ) {
 			return;

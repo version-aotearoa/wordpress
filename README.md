@@ -1,8 +1,11 @@
 # WordPress Plugins
 
-A collection of WordPress plugins built for the [version.nz](https://version.nz) site.
+A collection of WordPress plugins.
 
 ## Plugins
+
+### Frontend User Registration
+Self-service frontend registration, login and user profile management with approval workflow, custom roles, email notification, magic login links and member-only access controls.
 
 ### Resources Library
 A "Resources" custom post type with section tags and an AJAX-driven, filterable library page template (Video | Link | Article).
@@ -15,9 +18,6 @@ Features include:
 - Animated filtering with slide in/out transitions
 - Drag-and-drop section ordering (Resources -> Reorder Sections)
 - Members-only support via the Frontend User Registration plugin
-
-### Frontend User Registration
-Self-service frontend registration, login and user profile management with approval workflow, custom roles, and member-only access controls.
 
 ## Installation
 
