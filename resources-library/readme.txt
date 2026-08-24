@@ -4,7 +4,7 @@ Tags: resources, custom post type, ajax, library
 Requires at least: 5.8
 Tested up to: 6.6
 Requires PHP: 7.4
-Stable tag: 1.1.17
+Stable tag: 1.1.18
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -55,6 +55,9 @@ Yes. Instead of the page template, add the `[resources_library]` shortcode to a 
 If the Frontend User Registration plugin is active, enable "Resources" under Users -> Registration -> Settings -> Member Access to make the whole section Members-only.
 
 == Changelog ==
+
+= 1.1.18 =
+* Removed the video modal's close button; the modal now closes via the backdrop click or the Escape key.
 
 = 1.1.17 =
 * The Resource Tags and Resource Formats meta box tabs are now labelled "All" and "Recent".

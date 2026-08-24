@@ -1,7 +1,7 @@
 (function () {
 	'use strict';
 
-	console.log('[RL] library.js v1.1.17 loaded; fadeIn=' + (typeof fadeIn === 'function'));
+	console.log('[RL] library.js v1.1.18 loaded; fadeIn=' + (typeof fadeIn === 'function'));
 
 	(function checkKeyframes() {
 		var found = false;
@@ -34,12 +34,11 @@
 
 	function openVideo(url) {
 		console.log('[RL] openVideo', url);
-		var closeLabel = (window.rl_library && window.rl_library.close) ? window.rl_library.close : 'Close';
 		var modal = document.createElement('div');
 		modal.className = 'rl-modal';
 		modal.setAttribute('role', 'dialog');
 		modal.setAttribute('aria-modal', 'true');
-		modal.innerHTML = '<div class="rl-modal-box"><button type="button" class="rl-modal-close" aria-label="' + closeLabel + '">&times;</button><div class="rl-modal-body">' + embedVideo(url) + '</div></div>';
+		modal.innerHTML = '<div class="rl-modal-box"><div class="rl-modal-body">' + embedVideo(url) + '</div></div>';
 		document.body.appendChild(modal);
 
 		function close() {
@@ -57,7 +56,6 @@
 				close();
 			}
 		});
-		modal.querySelector('.rl-modal-close').addEventListener('click', close);
 		document.addEventListener('keydown', onKey);
 		document.body.style.overflow = 'hidden';
 	}

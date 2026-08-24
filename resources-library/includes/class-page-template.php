@@ -124,7 +124,6 @@ class RL_Page_Template {
 			'featured'   => __( 'Featured Resources', 'rl' ),
 			'favourites' => __( 'Favourites', 'rl' ),
 			'link_copied' => __( 'Link copied', 'rl' ),
-			'close'      => __( 'Close', 'rl' ),
 			)
 		);
 	}
