@@ -53,10 +53,14 @@ class RL_Ajax {
 			wp_send_json_error();
 		}
 
+		$post_type = get_post_type_object( RL_Plugin::PT );
+
 		wp_send_json_success(
 			array(
-				'html' => RL_Render::single( $post, $base, $tag ),
-				'url'  => get_permalink( $post ),
+				'html'       => RL_Render::single( $post, $base, $tag ),
+				'url'        => get_permalink( $post ),
+				'edit_url'   => get_edit_post_link( $post, 'raw' ),
+				'edit_label' => $post_type ? $post_type->labels->edit_item : __( 'Edit Resource', 'rl' ),
 			)
 		);
 	}

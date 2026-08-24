@@ -41,14 +41,14 @@
 	}
 
 	function check() {
-		document.querySelectorAll('.edit-post-meta-boxes-area, .block-editor-meta-boxes-area').forEach(function (area) {
+		document.querySelectorAll('.edit-post-meta-boxes-area, .block-editor-meta-boxes-area, .edit-post-meta-boxes-main').forEach(function (area) {
 			unhideIfPopulated(area);
 			hideIfEmpty(area);
 		});
 	}
 
 	var observer = new MutationObserver(check);
-	observer.observe(document.body, { childList: true, subtree: true });
+	observer.observe(document.body, { childList: true, subtree: true, attributes: true, attributeFilter: ['style', 'class'] });
 
 	document.addEventListener('change', function (e) {
 		var toggle = e.target;
@@ -126,7 +126,7 @@
 		var count = 0;
 		var poll = setInterval(function () {
 			check();
-			if (++count > 10) {
+			if (++count > 120) {
 				clearInterval(poll);
 			}
 		}, 500);

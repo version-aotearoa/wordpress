@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Resources Library
  * Description: A Resources custom post type with section tags and a filterable, AJAX-driven library page template (Video | Link | Article).
- * Version:     1.1.16
+ * Version:     1.1.17
  * Author:      Resources Library
  * License:     GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -11,7 +11,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'RL_VERSION', '1.1.16' );
+define( 'RL_VERSION', '1.1.17' );
 define( 'RL_FILE', __FILE__ );
 define( 'RL_PATH', plugin_dir_path( __FILE__ ) );
 define( 'RL_URL', plugin_dir_url( __FILE__ ) );

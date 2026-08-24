@@ -4,7 +4,7 @@ Tags: resources, custom post type, ajax, library
 Requires at least: 5.8
 Tested up to: 6.6
 Requires PHP: 7.4
-Stable tag: 1.1.16
+Stable tag: 1.1.17
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -55,6 +55,12 @@ Yes. Instead of the page template, add the `[resources_library]` shortcode to a 
 If the Frontend User Registration plugin is active, enable "Resources" under Users -> Registration -> Settings -> Member Access to make the whole section Members-only.
 
 == Changelog ==
+
+= 1.1.17 =
+* The Resource Tags and Resource Formats meta box tabs are now labelled "All" and "Recent".
+* Removed the grab cursor from the plugin's meta boxes, which no longer drag.
+* Fixed an empty "Meta boxes" footer area appearing in the block editor.
+* The admin bar "Edit" link now follows in-page navigation to the resource being viewed and returns to the container page when navigating back.
 
 = 1.1.16 =
 * Fixed the meta box drag override removing metaboxes in the block editor - the plugin's three boxes are now excluded from dragging instead of being cancelled mid-drag.

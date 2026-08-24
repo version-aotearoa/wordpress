@@ -83,6 +83,15 @@
 	display: none !important;
 }
 
+#rl_tags_box .postbox-header,
+#rl_tags_box .hndle,
+#rl_formats_box .postbox-header,
+#rl_formats_box .hndle,
+#rl_library_options .postbox-header,
+#rl_library_options .hndle {
+	cursor: default !important;
+}
+
 .category-tabs {
 	display: flex;
 	flex-wrap: wrap;

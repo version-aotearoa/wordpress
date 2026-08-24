@@ -1,7 +1,7 @@
 (function () {
 	'use strict';
 
-	console.log('[RL] library.js v1.1.16 loaded; fadeIn=' + (typeof fadeIn === 'function'));
+	console.log('[RL] library.js v1.1.17 loaded; fadeIn=' + (typeof fadeIn === 'function'));
 
 	(function checkKeyframes() {
 		var found = false;
@@ -117,6 +117,7 @@
 	var expanded = {};
 
 	updateSidebar();
+	initEditBar();
 
 	function parseState() {
 		var params = new URLSearchParams(window.location.search);
@@ -179,6 +180,7 @@
 			document.querySelectorAll('.rl-fav-nav').forEach(function (el) {
 				el.classList.toggle('rl-tag-active', state.favourites && !state.tag);
 			});
+			restoreEditBar();
 			fadeIn(container);
 		});
 	}
@@ -283,6 +285,56 @@
 		updateSidebar();
 	}
 
+	var origEdit = null;
+
+	function initEditBar() {
+		var el = document.getElementById('wp-admin-bar-edit');
+		if (!el) {
+			return;
+		}
+		var a = el.querySelector('.ab-item') || el.querySelector('a');
+		if (!a) {
+			return;
+		}
+		origEdit = { href: a.getAttribute('href'), html: a.innerHTML };
+	}
+
+	function setEditBar(href, label) {
+		var el = document.getElementById('wp-admin-bar-edit');
+		if (!el) {
+			return;
+		}
+		var a = el.querySelector('.ab-item') || el.querySelector('a');
+		if (!a || !href) {
+			return;
+		}
+		a.setAttribute('href', href);
+		var textNodes = Array.prototype.filter.call(a.childNodes, function (n) {
+			return n.nodeType === 3;
+		});
+		if (textNodes.length) {
+			textNodes[textNodes.length - 1].nodeValue = ' ' + label;
+		} else {
+			a.appendChild(document.createTextNode(' ' + label));
+		}
+	}
+
+	function restoreEditBar() {
+		if (!origEdit) {
+			return;
+		}
+		var el = document.getElementById('wp-admin-bar-edit');
+		if (!el) {
+			return;
+		}
+		var a = el.querySelector('.ab-item') || el.querySelector('a');
+		if (!a) {
+			return;
+		}
+		a.setAttribute('href', origEdit.href);
+		a.innerHTML = origEdit.html;
+	}
+
 	function load(s, replace) {
 		showLibraryHead();
 		container.classList.add('rl-loading');
@@ -328,6 +380,7 @@
 					return;
 				}
 				showSingle(json.data.html);
+				setEditBar(json.data.edit_url, json.data.edit_label);
 			})
 			.catch(function () {
 				container.classList.remove('rl-loading');

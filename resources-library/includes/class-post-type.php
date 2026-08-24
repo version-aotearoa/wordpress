@@ -144,8 +144,8 @@ class RL_Post_Type {
 		?>
 		<div id="taxonomy-<?php echo $tax_name; ?>" class="categorydiv">
 			<ul id="<?php echo $tax_name; ?>-tabs" class="category-tabs">
-				<li class="tabs"><a href="#<?php echo $tax_name; ?>-all" role="tab" aria-selected="true" aria-controls="<?php echo $tax_name; ?>-all"><?php echo esc_html( $tax->labels->all_items ); ?></a></li>
-				<li class="hide-if-no-js"><a href="#<?php echo $tax_name; ?>-pop" role="tab" aria-selected="false" aria-controls="<?php echo $tax_name; ?>-pop"><?php echo esc_html( $tax->labels->most_used ); ?></a></li>
+				<li class="tabs"><a href="#<?php echo $tax_name; ?>-all" role="tab" aria-selected="true" aria-controls="<?php echo $tax_name; ?>-all"><?php esc_html_e( 'All', 'rl' ); ?></a></li>
+				<li class="hide-if-no-js"><a href="#<?php echo $tax_name; ?>-pop" role="tab" aria-selected="false" aria-controls="<?php echo $tax_name; ?>-pop"><?php esc_html_e( 'Recent', 'rl' ); ?></a></li>
 			</ul>
 
 			<div id="<?php echo $tax_name; ?>-pop" class="tabs-panel" style="display:none;" role="tabpanel" aria-hidden="true">
