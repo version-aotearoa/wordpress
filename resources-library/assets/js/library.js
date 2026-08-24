@@ -1,7 +1,7 @@
 (function () {
 	'use strict';
 
-	console.log('[RL] library.js v1.1.18 loaded; fadeIn=' + (typeof fadeIn === 'function'));
+	console.log('[RL] library.js v1.1.19 loaded; fadeIn=' + (typeof fadeIn === 'function'));
 
 	(function checkKeyframes() {
 		var found = false;

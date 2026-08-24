@@ -134,7 +134,7 @@
 .rl-chip-active {
 	background: var(--rl-accent);
 	border-color: var(--rl-accent);
-	color: #fff;
+	color: #000;
 }
 
 .rl-posts {
@@ -226,6 +226,15 @@
 
 .rl-card-title a:hover {
 	text-decoration: underline;
+}
+
+.rl-card-title .rl-ext-icon,
+.rl-single-title .rl-ext-icon {
+	display: inline-block;
+	width: .8em;
+	height: .8em;
+	margin-left: .3em;
+	vertical-align: baseline;
 }
 
 .rl-card-excerpt {
@@ -394,6 +403,15 @@
 	line-height: 1.3;
 }
 
+.rl-single-title a {
+	color: inherit;
+	text-decoration: none;
+}
+
+.rl-single-title a:hover {
+	text-decoration: underline;
+}
+
 .rl-single-thumb img,
 .rl-single-content img {
 	max-width: 100%;
@@ -409,7 +427,7 @@
 	display: inline-block;
 	margin-bottom: 1rem;
 	text-decoration: none;
-	color: var(--rl-accent);
+	color: #000;
 	font-size: .9rem;
 }
 

@@ -335,7 +335,11 @@ class RL_Render {
 		if ( $format ) {
 			$html .= '<span class="rl-badge rl-badge-' . esc_attr( sanitize_title( $format ) ) . '">' . esc_html( $format ) . '</span>';
 		}
-		$html .= '<h3 class="rl-card-title"><a href="' . esc_url( $url ) . '"' . $title_attrs . '>' . esc_html( $title ) . '</a></h3>';
+		$title_html = esc_html( $title );
+		if ( $external ) {
+			$title_html .= '<svg class="rl-ext-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>';
+		}
+		$html .= '<h3 class="rl-card-title"><a href="' . esc_url( $url ) . '"' . $title_attrs . '>' . $title_html . '</a></h3>';
 		$excerpt = has_excerpt( $post ) ? get_the_excerpt( $post ) : wp_trim_words( wp_strip_all_tags( get_the_content( null, false, $post ) ), 24 );
 		if ( $excerpt ) {
 			$html .= '<p class="rl-card-excerpt">' . esc_html( $excerpt ) . '</p>';
@@ -409,15 +413,27 @@ class RL_Render {
 			$back_label = __( '← Show all Resources', 'rl' );
 		}
 
+		$external_url = get_post_meta( $post->ID, RL_Plugin::URL_META, true );
+		$is_video = ( $external_url && ( 'video' === self::format_slug_of( $post->ID ) || self::is_video_url( $external_url ) ) );
+		$is_link = ( $external_url && ! $is_video );
+
 		$html = '<article class="rl-single">';
 		$html .= '<p><a class="rl-back" href="' . esc_url( $back ) . '">' . esc_html( $back_label ) . '</a></p>';
 		if ( $format ) {
 			$html .= '<span class="rl-badge rl-badge-' . esc_attr( sanitize_title( $format ) ) . '">' . esc_html( $format ) . '</span>';
 		}
-		$html .= '<h1 class="rl-single-title">' . esc_html( get_the_title( $post ) ) . '</h1>';
 
-		$external_url = get_post_meta( $post->ID, RL_Plugin::URL_META, true );
-		$is_video = ( $external_url && ( 'video' === self::format_slug_of( $post->ID ) || self::is_video_url( $external_url ) ) );
+		$title_html = esc_html( get_the_title( $post ) );
+		if ( $is_link ) {
+			$title_html .= '<svg class="rl-ext-icon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/></svg>';
+		}
+		$html .= '<h1 class="rl-single-title">';
+		if ( $is_link ) {
+			$html .= '<a href="' . esc_url( $external_url ) . '" target="_blank" rel="noopener">' . $title_html . '</a>';
+		} else {
+			$html .= $title_html;
+		}
+		$html .= '</h1>';
 
 		if ( has_post_thumbnail( $post ) ) {
 			$html .= '<div class="rl-single-thumb' . ( $is_video ? ' rl-single-thumb-video' : '' ) . '"' . ( $is_video ? ' data-video="' . esc_url( $external_url ) . '"' : '' ) . '>' . get_the_post_thumbnail( $post, 'large' );
