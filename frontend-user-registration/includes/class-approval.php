@@ -22,7 +22,7 @@ class FEUR_Approval {
 			$token = FEUR_Magic_Link::issue( $user_id );
 			self::send_magic_link_email( $user_id, $token, $redirect );
 		}
-		$back = wp_get_referer() ? wp_get_referer() : admin_url( 'users.php?page=feur-user-data' );
+		$back = wp_get_referer() ? wp_get_referer() : admin_url( 'admin.php?page=feur-members' );
 		wp_safe_redirect( add_query_arg( 'feur_approved', '1', $back ) );
 		exit;
 	}
@@ -38,7 +38,7 @@ class FEUR_Approval {
 			self::set_status( $user_id, 'denied' );
 			self::send_deny_email( $user_id );
 		}
-		$back = wp_get_referer() ? wp_get_referer() : admin_url( 'users.php?page=feur-user-data' );
+		$back = wp_get_referer() ? wp_get_referer() : admin_url( 'admin.php?page=feur-members' );
 		wp_safe_redirect( add_query_arg( 'feur_denied', '1', $back ) );
 		exit;
 	}
@@ -53,7 +53,7 @@ class FEUR_Approval {
 		if ( $user ) {
 			self::set_status( $user_id, 'pending' );
 		}
-		$back = wp_get_referer() ? wp_get_referer() : admin_url( 'users.php?page=feur-user-data' );
+		$back = wp_get_referer() ? wp_get_referer() : admin_url( 'admin.php?page=feur-members' );
 		wp_safe_redirect( add_query_arg( 'feur_pending', '1', $back ) );
 		exit;
 	}
@@ -117,7 +117,7 @@ class FEUR_Approval {
 			}
 			$body .= '</table>';
 			if ( $pending ) {
-				$body .= '<p><a href="' . esc_url( admin_url( 'users.php?page=feur-user-data' ) ) . '">' . esc_html__( 'Review pending members', 'feur' ) . '</a></p>';
+				$body .= '<p><a href="' . esc_url( admin_url( 'admin.php?page=feur-members' ) ) . '">' . esc_html__( 'Review pending members', 'feur' ) . '</a></p>';
 			}
 			self::email( get_option( 'admin_email' ), $subject, $body );
 		}

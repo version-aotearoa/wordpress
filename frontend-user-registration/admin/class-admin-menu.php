@@ -12,7 +12,8 @@ class FEUR_Admin_Menu {
 	}
 
 	public function menu() {
-		add_users_page(
+		add_submenu_page(
+			'feur-members',
 			__( 'Registration', 'feur' ),
 			__( 'Registration', 'feur' ),
 			'manage_options',
@@ -29,8 +30,8 @@ class FEUR_Admin_Menu {
 		echo '<div class="wrap">';
 		echo '<h1>' . esc_html__( 'User Registration', 'feur' ) . '</h1>';
 		echo '<nav class="nav-tab-wrapper">';
-		echo '<a class="nav-tab' . ( 'fields' === $tab ? ' nav-tab-active' : '' ) . '" href="' . esc_url( admin_url( 'users.php?page=feur-registration&tab=fields' ) ) . '">' . esc_html__( 'Fields', 'feur' ) . '</a>';
-		echo '<a class="nav-tab' . ( 'settings' === $tab ? ' nav-tab-active' : '' ) . '" href="' . esc_url( admin_url( 'users.php?page=feur-registration&tab=settings' ) ) . '">' . esc_html__( 'Settings', 'feur' ) . '</a>';
+		echo '<a class="nav-tab' . ( 'fields' === $tab ? ' nav-tab-active' : '' ) . '" href="' . esc_url( admin_url( 'admin.php?page=feur-registration&tab=fields' ) ) . '">' . esc_html__( 'Fields', 'feur' ) . '</a>';
+		echo '<a class="nav-tab' . ( 'settings' === $tab ? ' nav-tab-active' : '' ) . '" href="' . esc_url( admin_url( 'admin.php?page=feur-registration&tab=settings' ) ) . '">' . esc_html__( 'Settings', 'feur' ) . '</a>';
 		echo '</nav>';
 		echo '<div style="margin-top:12px">';
 		if ( 'fields' === $tab ) {

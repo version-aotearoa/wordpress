@@ -8,11 +8,21 @@ class FEUR_User_Admin_Page {
 	}
 
 	public function menu() {
-		add_users_page(
+		add_menu_page(
 			__( 'Members', 'feur' ),
 			__( 'Members', 'feur' ),
 			'manage_options',
-			'feur-user-data',
+			'feur-members',
+			array( $this, 'render' ),
+			'dashicons-groups',
+			71
+		);
+		add_submenu_page(
+			'feur-members',
+			__( 'All Members', 'feur' ),
+			__( 'All Members', 'feur' ),
+			'manage_options',
+			'feur-members',
 			array( $this, 'render' )
 		);
 	}

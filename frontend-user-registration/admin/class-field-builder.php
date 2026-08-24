@@ -60,7 +60,7 @@ class FEUR_Field_Builder {
 			$html .= '<td>' . esc_html( implode( ', ', FEUR_Field_Types::options( $f ) ) ) . '</td>';
 			$html .= '<td>' . esc_html( implode( ', ', $tags ) ) . '</td>';
 			$html .= '<td>';
-			$edit = add_query_arg( array( 'page' => 'feur-registration', 'tab' => 'fields', 'edit' => $f['id'] ), admin_url( 'users.php' ) );
+			$edit = add_query_arg( array( 'page' => 'feur-registration', 'tab' => 'fields', 'edit' => $f['id'] ), admin_url( 'admin.php' ) );
 			$del = wp_nonce_url( admin_url( 'admin-post.php?action=feur_delete_field&field=' . urlencode( $f['id'] ) ), 'feur_delete_field_' . $f['id'] );
 			$up = wp_nonce_url( admin_url( 'admin-post.php?action=feur_move_field&field=' . urlencode( $f['id'] ) . '&dir=-1' ), 'feur_move_field_' . $f['id'] );
 			$down = wp_nonce_url( admin_url( 'admin-post.php?action=feur_move_field&field=' . urlencode( $f['id'] ) . '&dir=1' ), 'feur_move_field_' . $f['id'] );
@@ -153,7 +153,7 @@ class FEUR_Field_Builder {
 		$html .= '<p class="submit">';
 		$html .= '<button type="submit" class="button button-primary">' . esc_html__( 'Save Field', 'feur' ) . '</button> ';
 		if ( $editing ) {
-			$html .= '<a class="button" href="' . esc_url( add_query_arg( array( 'page' => 'feur-registration', 'tab' => 'fields' ), admin_url( 'users.php' ) ) ) . '">' . esc_html__( 'Cancel', 'feur' ) . '</a>';
+			$html .= '<a class="button" href="' . esc_url( add_query_arg( array( 'page' => 'feur-registration', 'tab' => 'fields' ), admin_url( 'admin.php' ) ) ) . '">' . esc_html__( 'Cancel', 'feur' ) . '</a>';
 		}
 		$html .= '</p>';
 		$html .= '</form>';
@@ -233,7 +233,7 @@ class FEUR_Field_Builder {
 		}
 		FEUR_Field_Repository::save_fields( $fields );
 
-		$url = add_query_arg( array( 'page' => 'feur-registration', 'tab' => 'fields', 'saved' => '1' ), admin_url( 'users.php' ) );
+		$url = add_query_arg( array( 'page' => 'feur-registration', 'tab' => 'fields', 'saved' => '1' ), admin_url( 'admin.php' ) );
 		wp_safe_redirect( $url );
 		exit;
 	}
@@ -245,7 +245,7 @@ class FEUR_Field_Builder {
 			wp_die( esc_html__( 'You are not allowed to do that.', 'feur' ) );
 		}
 		FEUR_Field_Repository::delete_field( $id );
-		wp_safe_redirect( add_query_arg( array( 'page' => 'feur-registration', 'tab' => 'fields' ), admin_url( 'users.php' ) ) );
+		wp_safe_redirect( add_query_arg( array( 'page' => 'feur-registration', 'tab' => 'fields' ), admin_url( 'admin.php' ) ) );
 		exit;
 	}
 
@@ -257,7 +257,7 @@ class FEUR_Field_Builder {
 			wp_die( esc_html__( 'You are not allowed to do that.', 'feur' ) );
 		}
 		FEUR_Field_Repository::move( $id, $dir );
-		wp_safe_redirect( add_query_arg( array( 'page' => 'feur-registration', 'tab' => 'fields' ), admin_url( 'users.php' ) ) );
+		wp_safe_redirect( add_query_arg( array( 'page' => 'feur-registration', 'tab' => 'fields' ), admin_url( 'admin.php' ) ) );
 		exit;
 	}
 }
