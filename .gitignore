@@ -8,6 +8,7 @@ archive/
 # Local tooling / environment
 .agents/
 skills-lock.json
+AGENTS.md
 
 # Screenshots and scratch files
 reorder_meta.png
