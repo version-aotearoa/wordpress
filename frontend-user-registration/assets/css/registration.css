@@ -1,0 +1,132 @@
+.feur-account {
+	max-width: 640px;
+}
+
+.feur-tabs {
+	margin: 0 0 1.2em;
+	border-bottom: 1px solid #ddd;
+}
+
+.feur-tab {
+	background: none;
+	border: 0;
+	padding: .6em 1em;
+	cursor: pointer;
+	font-size: 1rem;
+	border-bottom: 2px solid transparent;
+	margin-bottom: -1px;
+}
+
+.feur-tab-active {
+	border-bottom-color: #2271b1;
+	font-weight: 600;
+}
+
+.feur-panel {
+	display: none;
+}
+
+.feur-panel-active {
+	display: block;
+}
+
+.feur-form label {
+	display: inline-block;
+	margin-bottom: .25em;
+	font-weight: 600;
+}
+
+.feur-field-label {
+	display: inline-block;
+	margin-bottom: .25em;
+	font-weight: 600;
+}
+
+.feur-input {
+	width: 100%;
+	padding: .5em .6em;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	box-sizing: border-box;
+}
+
+.feur-button {
+	background: #2271b1;
+	color: #fff;
+	border: 0;
+	padding: .6em 1.4em;
+	border-radius: 4px;
+	cursor: pointer;
+	font-size: 1rem;
+}
+
+.feur-button:hover {
+	background: #135e96;
+}
+
+.feur-notice {
+	padding: .8em 1em;
+	border-radius: 4px;
+	margin-bottom: 1em;
+}
+
+.feur-notice ul {
+	margin: 0;
+	padding-left: 1.2em;
+}
+
+.feur-error {
+	background: #fcf0f1;
+	border: 1px solid #d63638;
+	color: #8a1f21;
+}
+
+.feur-success {
+	background: #edfaef;
+	border: 1px solid #00a32a;
+	color: #007017;
+}
+
+.feur-required {
+	color: #d63638;
+}
+
+.feur-radio,
+.feur-checkbox {
+	display: block;
+	margin: .25em 0;
+	font-weight: 400;
+}
+
+.feur-radio-group .feur-radio,
+.feur-checkbox-group .feur-checkbox {
+	font-weight: 400;
+}
+
+.feur-details {
+	margin: 1.2em 0;
+	padding: 1em;
+	border: 1px solid #e5e7eb;
+	border-radius: 8px;
+	background: #fff;
+}
+
+.feur-details h3 {
+	margin: 0 0 .75em;
+	font-size: 1rem;
+}
+
+.feur-details dl {
+	margin: 0;
+	display: grid;
+	grid-template-columns: 160px 1fr;
+	gap: .4em 1em;
+}
+
+.feur-details dt {
+	font-weight: 600;
+}
+
+.feur-details dd {
+	margin: 0;
+}

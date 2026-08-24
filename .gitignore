@@ -1,0 +1,14 @@
+.DS_Store
+__MACOSX/
+
+# Release archives and backups
+*.zip
+archive/
+
+# Local tooling / environment
+.agents/
+skills-lock.json
+
+# Screenshots and scratch files
+reorder_meta.png
+*.png
