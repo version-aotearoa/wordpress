@@ -19,6 +19,9 @@ Features include:
 - Drag-and-drop section ordering (Resources -> Reorder Sections)
 - Members-only support via the Frontend User Registration plugin
 
+### Contact Form 7 Submissions
+Saves Contact Form 7 submissions to the database with an admin list, detail view and CSV export.
+
 ## Installation
 
 Each plugin lives in its own folder and can be uploaded directly to `wp-content/plugins/` and activated from the WordPress admin. See each plugin's `readme.txt` for full instructions.
