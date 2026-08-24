@@ -254,7 +254,8 @@
 }
 
 .rl-share,
-.rl-fav {
+.rl-fav,
+.rl-edit {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
@@ -276,10 +277,19 @@
 	cursor: pointer;
 	box-sizing: border-box;
 	appearance: none;
+	text-decoration: none;
+}
+
+.rl-edit {
+	position: absolute;
+	top: .5rem;
+	left: .5rem;
+	z-index: 2;
 }
 
 .rl-share:hover,
-.rl-fav:hover {
+.rl-fav:hover,
+.rl-edit:hover {
 	border-color: var(--rl-accent);
 	color: var(--rl-accent);
 }

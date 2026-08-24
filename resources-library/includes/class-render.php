@@ -324,6 +324,10 @@ class RL_Render {
 		}
 
 		$html = '<article class="rl-card"' . ( $format_slug ? ' data-format="' . esc_attr( $format_slug ) . '"' : '' ) . '>';
+		$edit_url = get_edit_post_link( $post->ID );
+		if ( $edit_url ) {
+			$html .= '<a class="rl-edit" href="' . esc_url( $edit_url ) . '" aria-label="' . esc_attr__( 'Edit resource', 'rl' ) . '"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg></a>';
+		}
 		if ( has_post_thumbnail( $post ) ) {
 			$html .= '<a class="rl-card-thumb" href="' . esc_url( $url ) . '"' . $thumb_attrs . '>' . get_the_post_thumbnail( $post, 'rl-card' );
 			if ( $is_video ) {

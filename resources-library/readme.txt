@@ -4,7 +4,7 @@ Tags: resources, custom post type, ajax, library
 Requires at least: 5.8
 Tested up to: 6.6
 Requires PHP: 7.4
-Stable tag: 1.1.19
+Stable tag: 1.1.20
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -52,9 +52,12 @@ Yes. Instead of the page template, add the `[resources_library]` shortcode to a 
 
 = Can I restrict the Resources section to members? =
 
-If the Frontend User Registration plugin is active, enable "Resources" under Users -> Registration -> Settings -> Member Access to make the whole section Members-only.
+If the Frontend User Registration plugin is active, enable "Resources" under Members -> Registration -> Settings -> Member Access to make the whole section Members-only.
 
 == Changelog ==
+
+= 1.1.20 =
+* Cards now show a pencil edit button at the top-left of the card image linking to the resource's editor, visible only to users who can edit.
 
 = 1.1.19 =
 * Website link cards and their single pages now show an external link icon after the title; on the single page the title links out to the website.
