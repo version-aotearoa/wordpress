@@ -4,7 +4,7 @@ Tags: resources, custom post type, ajax, library
 Requires at least: 5.8
 Tested up to: 6.6
 Requires PHP: 7.4
-Stable tag: 1.1.20
+Stable tag: 1.1.24
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -55,6 +55,19 @@ Yes. Instead of the page template, add the `[resources_library]` shortcode to a 
 If the Frontend User Registration plugin is active, enable "Resources" under Members -> Registration -> Settings -> Member Access to make the whole section Members-only.
 
 == Changelog ==
+
+= 1.1.24 =
+* Mobile: selecting Favourites now scrolls the results to the top like selecting a section, and the scroll position clears the floating header so section titles stay visible.
+
+= 1.1.23 =
+* Mobile: the section list no longer auto-collapses when a section is selected (the page still scrolls to the selected section).
+
+= 1.1.22 =
+* Single resource Favourites/Share buttons now sit on the same row as the format badge.
+
+= 1.1.21 =
+* Mobile: the sidebar now has a "Sections" heading (below Favourites) that collapses the section list on selection and scrolls the selected section to the top; tapping "Sections" reopens the list.
+* Single resource views now show Favourites and Share buttons on the same row as the format badge, above the title.
 
 = 1.1.20 =
 * Cards now show a pencil edit button at the top-left of the card image linking to the resource's editor, visible only to users who can edit.

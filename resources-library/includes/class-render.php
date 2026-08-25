@@ -118,7 +118,8 @@ class RL_Render {
 		}
 		if ( ! is_wp_error( $tags ) && ! empty( $tags ) ) {
 			$by_parent = self::group_tags( $tags );
-			$html .= '<nav class="rl-tag-nav" aria-label="' . esc_attr__( 'Resource sections', 'rl' ) . '">';
+			$html .= '<h3 class="rl-sidebar-sections"><button type="button" class="rl-sidebar-toggle" aria-expanded="true" aria-controls="rl-tag-nav">' . esc_html__( 'Sections', 'rl' ) . '</button></h3>';
+			$html .= '<nav class="rl-tag-nav" id="rl-tag-nav" aria-label="' . esc_attr__( 'Resource sections', 'rl' ) . '">';
 			$html .= self::tag_list_html( $by_parent, 0, '', $tag_slug, $format_slug, $base_url );
 			$html .= '</nav>';
 		} else {
@@ -423,9 +424,19 @@ class RL_Render {
 
 		$html = '<article class="rl-single">';
 		$html .= '<p><a class="rl-back" href="' . esc_url( $back ) . '">' . esc_html( $back_label ) . '</a></p>';
+		$html .= '<div class="rl-single-top">';
 		if ( $format ) {
 			$html .= '<span class="rl-badge rl-badge-' . esc_attr( sanitize_title( $format ) ) . '">' . esc_html( $format ) . '</span>';
 		}
+
+		$html .= '<div class="rl-single-actions">';
+		if ( is_user_logged_in() ) {
+			$is_faved = self::is_favourited( $post->ID );
+			$html .= '<button type="button" class="rl-fav' . ( $is_faved ? ' rl-faved' : '' ) . '" data-fav="' . esc_attr( $post->ID ) . '" aria-pressed="' . ( $is_faved ? 'true' : 'false' ) . '" aria-label="' . esc_attr__( 'Add to favourites', 'rl' ) . '"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M12 21s-6-4.35-9-8.5C1.1 8.2 3.4 5 6.7 5c1.9 0 3.3 1 5.3 3 2-2 3.4-3 5.3-3 3.3 0 5.6 3.2 4.7 7.5C18 16.65 12 21 12 21z"/></svg></button>';
+		}
+		$html .= '<button type="button" class="rl-share" data-share="' . esc_url( get_permalink( $post ) ) . '" aria-label="' . esc_attr__( 'Share', 'rl' ) . '"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92-1.31-2.92-2.92-2.92z"/></svg></button>';
+		$html .= '</div>';
+		$html .= '</div>';
 
 		$title_html = esc_html( get_the_title( $post ) );
 		if ( $is_link ) {
