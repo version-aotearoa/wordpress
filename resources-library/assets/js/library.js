@@ -162,16 +162,19 @@
 		return params.toString();
 	}
 
-	function render(html, more, formatsHtml) {
+	function render(html, more, formatsHtml, login) {
 		animateOut(function () {
 			container.innerHTML = html;
 			container.setAttribute('data-page', state.page);
 			if (loadMore) {
-				loadMore.style.display = more ? '' : 'none';
+				loadMore.style.display = (more && !login) ? '' : 'none';
 			}
 			if (formatsEl && typeof formatsHtml === 'string' && formatsHtml !== '') {
 				formatsEl.outerHTML = formatsHtml;
 				formatsEl = document.getElementById('rl-formats');
+			}
+			if (formatsEl) {
+				formatsEl.style.display = login ? 'none' : '';
 			}
 			if (title) {
 				if (state.tag) {
@@ -189,6 +192,9 @@
 			updateSidebar();
 			document.querySelectorAll('.rl-fav-nav').forEach(function (el) {
 				el.classList.toggle('rl-tag-active', state.favourites && !state.tag);
+			});
+			document.querySelectorAll('.rl-featured-nav').forEach(function (el) {
+				el.classList.toggle('rl-tag-active', !state.tag && !state.favourites);
 			});
 			restoreEditBar();
 			fadeIn(container);
@@ -211,8 +217,8 @@
 		container.innerHTML = html;
 	}
 
-	function empty() {
-		container.innerHTML = '<p class="rl-empty">' + window.rl_library.no_results + '</p>';
+	function failed() {
+		container.innerHTML = '<p class="rl-empty">' + window.rl_library.error + '</p>';
 	}
 
 	function fadeIn(el) {
@@ -300,18 +306,8 @@
 	}
 
 	function minimizeSidebar() {
-		if (!isMobileView() || !sidebar) {
-			return;
-		}
 		// Auto-minimise removed: keep the section list visible on selection.
-		// sidebar.classList.add('rl-minimized');
-		// if (sidebarToggle) {
-		// 	sidebarToggle.setAttribute('aria-expanded', 'false');
-		// }
-		var main = document.getElementById('rl-main');
-		if (main) {
-			main.scrollIntoView({ behavior: 'smooth', block: 'start' });
-		}
+		window.scrollTo({ top: 0, behavior: 'smooth' });
 	}
 
 	var origEdit = null;
@@ -369,11 +365,16 @@
 		container.classList.add('rl-loading');
 		container.textContent = window.rl_library.loading;
 		fetch(window.rl_library.ajax_url + '?' + buildQuery(s))
-			.then(function (res) { return res.json(); })
+			.then(function (res) {
+				if (!res.ok) {
+					return null;
+				}
+				return res.json();
+			})
 			.then(function (json) {
 				container.classList.remove('rl-loading');
 				if (!json || !json.success) {
-					empty();
+					failed();
 					return;
 				}
 				var formats = json.data.formats || [];
@@ -384,11 +385,11 @@
 					return;
 				}
 				state = s;
-				render(json.data.html, json.data.more, json.data.formats_html);
+				render(json.data.html, json.data.more, json.data.formats_html, json.data.login);
 			})
 			.catch(function () {
 				container.classList.remove('rl-loading');
-				empty();
+				failed();
 			});
 	}
 
@@ -402,10 +403,16 @@
 		container.classList.add('rl-loading');
 		container.textContent = window.rl_library.loading;
 		fetch(window.rl_library.ajax_url + '?' + params.toString())
-			.then(function (res) { return res.json(); })
+			.then(function (res) {
+				if (!res.ok) {
+					return null;
+				}
+				return res.json();
+			})
 			.then(function (json) {
 				container.classList.remove('rl-loading');
 				if (!json || !json.success) {
+					failed();
 					return;
 				}
 				showSingle(json.data.html);
@@ -413,6 +420,7 @@
 			})
 			.catch(function () {
 				container.classList.remove('rl-loading');
+				failed();
 			});
 	}
 
@@ -430,6 +438,7 @@
 		lastLibrary = Object.assign({}, state);
 		loadSingle(postId);
 		window.history.pushState({ post: postId }, '', url);
+		window.scrollTo({ top: 0, behavior: 'smooth' });
 	}
 
 	function applyFormatFilter(format) {
@@ -580,6 +589,15 @@
 		favNav.addEventListener('click', function (e) {
 			e.preventDefault();
 			go({ tag: '', format: '', page: 1, favourites: true }, false);
+			minimizeSidebar();
+		});
+	}
+
+	var featuredNav = document.querySelector('.rl-featured-nav');
+	if (featuredNav) {
+		featuredNav.addEventListener('click', function (e) {
+			e.preventDefault();
+			go({ tag: '', format: '', page: 1, favourites: false }, false);
 			minimizeSidebar();
 		});
 	}

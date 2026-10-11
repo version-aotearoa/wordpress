@@ -97,14 +97,14 @@
 
 	if (window.jQuery) {
 		window.jQuery(function ($) {
-			var TARGET = '#rl_tags_box, #rl_formats_box, #rl_library_options';
+			var TARGET = '#rl_library_options';
 			function blockDrag(container) {
 				var sortable = $(container).data('ui-sortable') || $(container).data('sortable');
 				if (!sortable || !sortable.options) {
 					return;
 				}
 				var cur = sortable.options.cancel || '';
-				if (cur && cur.indexOf('#rl_tags_box') !== -1) {
+				if (cur && cur.indexOf('#rl_library_options') !== -1) {
 					return;
 				}
 				sortable.options.cancel = cur ? cur + ', ' + TARGET : TARGET;
@@ -114,6 +114,52 @@
 			});
 			$(document).on('mouseenter', '.meta-box-sortables', function () {
 				blockDrag(this);
+			});
+		});
+	}
+
+	if (window.jQuery && window.wp && window.wp.media) {
+		window.jQuery(function ($) {
+			$(document).on('click', '.rl-file-field .rl-media-select', function (e) {
+				e.preventDefault();
+				var $wrap = $(this).closest('.rl-file-field');
+				var types = (window.rl_admin && window.rl_admin.file_mimes) || [];
+				var frame = wp.media({
+					title: (window.rl_admin && window.rl_admin.select_file) || 'Select downloadable file',
+					button: { text: (window.rl_admin && window.rl_admin.use_file) || 'Use file' },
+					multiple: false,
+					library: { type: types }
+				});
+				frame.on('select', function () {
+					var a = frame.state().get('selection').first().toJSON();
+					var name = a.filename || (a.url || '').split('/').pop() || '';
+					var ext = name.indexOf('.') > -1 ? name.split('.').pop().toUpperCase() : '';
+					var meta = [];
+					if (ext) {
+						meta.push(ext);
+					}
+					if (a.filesizeHumanReadable) {
+						meta.push(a.filesizeHumanReadable);
+					}
+					var $preview = $wrap.find('.rl-media-preview').empty();
+					$('<a>').attr({ href: a.url, target: '_blank', rel: 'noopener' }).text(name).appendTo($preview);
+					if (meta.length) {
+						$preview.append(' ').append($('<span>').addClass('rl-file-meta').text(meta.join(' \u00b7 ')));
+					}
+					$wrap.find('.rl-media-id').val(a.id);
+					$wrap.find('.rl-media-select').hide();
+					$wrap.find('.rl-media-remove').show();
+				});
+				frame.open();
+			});
+
+			$(document).on('click', '.rl-file-field .rl-media-remove', function (e) {
+				e.preventDefault();
+				var $wrap = $(this).closest('.rl-file-field');
+				$wrap.find('.rl-media-id').val('0');
+				$wrap.find('.rl-media-preview').empty();
+				$(this).hide();
+				$wrap.find('.rl-media-select').show();
 			});
 		});
 	}

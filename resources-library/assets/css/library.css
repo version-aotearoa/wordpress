@@ -1,5 +1,7 @@
 :root {
 	--rl-accent: #2271b1;
+	--rl-accent-light: #e9f1f7;
+	--rl-accent-dark: #135e96;
 }
 
 .rl-library {
@@ -61,8 +63,8 @@
 }
 
 .rl-tag-active {
-	background: var(--rl-accent);
-	color: #000;
+	background: var(--rl-accent-light);
+	color: var(--rl-accent);
 }
 
 .rl-tag-child {
@@ -116,6 +118,11 @@
 	transform: rotate(90deg);
 }
 
+.rl-tag-arrow.is-open {
+	background: var(--rl-accent-light);
+	color: var(--rl-accent);
+}
+
 .rl-main {
 	flex: 1 1 auto;
 	min-width: 0;
@@ -150,9 +157,9 @@
 }
 
 .rl-chip-active {
-	background: var(--rl-accent);
+	background: var(--rl-accent-light);
 	border-color: var(--rl-accent);
-	color: #000;
+	color: var(--rl-accent);
 }
 
 .rl-posts {
@@ -259,6 +266,26 @@
 	margin: 0;
 	font-size: .9rem;
 	color: #50575e;
+}
+
+.rl-card-btn {
+	display: block;
+	margin-top: auto;
+	padding: .55rem 1rem;
+	/* border: 1px solid var(--rl-accent); */
+	border-radius: 6px;
+	background: var(--rl-accent-light);
+	color: var(--rl-accent);
+	text-align: center;
+	text-decoration: none;
+	font-size: .9rem;
+	font-weight: 600;
+}
+
+.rl-card-btn:hover {
+	background: var(--rl-accent-dark);
+	border-color: var(--rl-accent-dark);
+	color: #fff;
 }
 
 .rl-card-actions {
@@ -371,17 +398,18 @@
 	width: auto;
 	height: auto;
 	padding: .6rem 1.2rem;
-	border: 0;
+	border: 1px solid var(--rl-accent);
 	border-radius: 6px;
-	background: var(--rl-accent);
-	color: #fff;
+	background: var(--rl-accent-light);
+	color: var(--rl-accent);
 	font-size: .9rem;
 	cursor: pointer;
 }
 
 .rl-play-standalone:hover {
 	transform: none;
-	background: #135e96;
+	background: var(--rl-accent-dark);
+	color: #fff;
 }
 
 .rl-toast {
@@ -411,6 +439,22 @@
 .rl-badge-video { background: #fcf9e8; }
 .rl-badge-link { background: #eaf2fa; }
 .rl-badge-article { background: #edfaef; }
+
+.rl-single-download {
+	display: inline-block;
+	padding: .55rem 1rem;
+	border-radius: 6px;
+	background: var(--rl-accent-light);
+	color: var(--rl-accent);
+	text-decoration: none;
+	font-size: .9rem;
+	font-weight: 600;
+}
+
+.rl-single-download:hover {
+	background: var(--rl-accent-dark);
+	color: #fff;
+}
 
 .rl-empty {
 	grid-column: 1 / -1;
@@ -516,8 +560,8 @@
 }
 
 .rl-load-more:hover {
-	background: var(--rl-accent);
-	color: #fff;
+	background: var(--rl-accent-light);
+	color: var(--rl-accent);
 }
 
 @media (max-width: 782px) {
@@ -558,4 +602,21 @@
 	.rl-sidebar.rl-minimized .rl-sidebar-toggle::after {
 		transform: rotate(-135deg);
 	}
+}
+
+.rl-gate {
+	max-width: 480px;
+	padding: 1.5rem;
+	border: 1px solid #e2e4e7;
+	border-radius: 8px;
+	background: #fff;
+}
+
+.rl-gate-title {
+	margin: 0 0 .5rem;
+	font-size: 1.25rem;
+}
+
+.rl-gate-text {
+	margin: 0 0 1rem;
 }

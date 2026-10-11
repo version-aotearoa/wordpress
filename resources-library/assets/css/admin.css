@@ -74,22 +74,20 @@
 	border-radius: 4px;
 }
 
-#rl_tags_box .handle-order-higher,
-#rl_tags_box .handle-order-lower,
-#rl_formats_box .handle-order-higher,
-#rl_formats_box .handle-order-lower,
 #rl_library_options .handle-order-higher,
 #rl_library_options .handle-order-lower {
 	display: none !important;
 }
 
-#rl_tags_box .postbox-header,
-#rl_tags_box .hndle,
-#rl_formats_box .postbox-header,
-#rl_formats_box .hndle,
 #rl_library_options .postbox-header,
 #rl_library_options .hndle {
 	cursor: default !important;
+}
+
+#rl_library_options .rl-tax-heading {
+	margin: 14px 0 6px;
+	padding-top: 10px;
+	border-top: 1px solid #dcdcde;
 }
 
 .category-tabs {
@@ -121,4 +119,22 @@
 	font-weight: 600;
 	position: relative;
 	top: 1px;
+}
+
+.rl-file-field .rl-file-preview {
+	margin: 0 0 6px;
+	word-break: break-word;
+}
+
+.rl-file-field .rl-file-preview a {
+	text-decoration: none;
+}
+
+.rl-file-meta {
+	color: #646970;
+	font-size: 12px;
+}
+
+.rl-file-field .button {
+	margin-top: 0;
 }

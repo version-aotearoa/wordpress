@@ -13,13 +13,23 @@ class RL_Ajax {
 	}
 
 	public function handle() {
-		check_ajax_referer( 'rl_load_posts', 'nonce' );
-
 		$tag = isset( $_GET['tag'] ) ? sanitize_title( wp_unslash( $_GET['tag'] ) ) : '';
 		$format = isset( $_GET['format'] ) ? sanitize_title( wp_unslash( $_GET['format'] ) ) : '';
 		$paged = isset( $_GET['page'] ) ? absint( $_GET['page'] ) : 1;
 		$base = isset( $_GET['base'] ) ? esc_url_raw( wp_unslash( $_GET['base'] ) ) : '';
 		$favourites = ( '1' === ( isset( $_GET['favourites'] ) ? sanitize_key( wp_unslash( $_GET['favourites'] ) ) : '' ) );
+
+		if ( RL_Access::is_gated_view() ) {
+			wp_send_json_success(
+				array(
+					'html'         => RL_Access::login_panel( RL_Render::gated_redirect_url( $tag, $favourites, $base ) ),
+					'login'        => true,
+					'more'         => false,
+					'formats'      => array(),
+					'formats_html' => '',
+				)
+			);
+		}
 
 		$query = RL_Render::query( $tag, $format, $paged, $favourites );
 
@@ -42,8 +52,6 @@ class RL_Ajax {
 	}
 
 	public function single() {
-		check_ajax_referer( 'rl_load_posts', 'nonce' );
-
 		$post_id = isset( $_GET['post_id'] ) ? absint( $_GET['post_id'] ) : 0;
 		$base = isset( $_GET['base'] ) ? esc_url_raw( wp_unslash( $_GET['base'] ) ) : '';
 		$tag = isset( $_GET['tag'] ) ? sanitize_title( wp_unslash( $_GET['tag'] ) ) : '';
@@ -51,6 +59,18 @@ class RL_Ajax {
 		$post = get_post( $post_id );
 		if ( ! $post || RL_Plugin::PT !== $post->post_type || 'publish' !== $post->post_status ) {
 			wp_send_json_error();
+		}
+
+		if ( RL_Access::is_gated_single( $post_id ) ) {
+			wp_send_json_success(
+				array(
+					'html'       => RL_Access::login_panel( get_permalink( $post ) ),
+					'url'        => get_permalink( $post ),
+					'edit_url'   => '',
+					'edit_label' => '',
+					'login'      => true,
+				)
+			);
 		}
 
 		$post_type = get_post_type_object( RL_Plugin::PT );

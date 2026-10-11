@@ -107,9 +107,20 @@ class RL_Page_Template {
 		wp_register_style( 'rl-library', RL_URL . 'assets/css/library.css', array(), RL_VERSION );
 		wp_register_script( 'rl-library', RL_URL . 'assets/js/library.js', array(), RL_VERSION, true );
 		wp_enqueue_style( 'rl-library' );
-		$accent = RL_Plugin::get_setting( 'accent_color', '#2271b1' );
-		if ( preg_match( '/^#([0-9a-f]{3}|[0-9a-f]{6})$/i', $accent ) ) {
-			wp_add_inline_style( 'rl-library', ':root{--rl-accent:' . $accent . ';}' );
+		$vars = array(
+			'--rl-accent'       => RL_Plugin::get_setting( 'accent_color', '#2271b1' ),
+			'--rl-accent-light' => RL_Plugin::get_setting( 'light_accent', '#e9f1f7' ),
+			'--rl-accent-dark'  => RL_Plugin::get_setting( 'dark_accent', '#135e96' ),
+		);
+		$rule = ':root{';
+		foreach ( $vars as $var => $color ) {
+			if ( preg_match( '/^#([0-9a-f]{3}|[0-9a-f]{6})$/i', $color ) ) {
+				$rule .= $var . ':' . $color . ';';
+			}
+		}
+		$rule .= '}';
+		if ( strlen( $rule ) > 7 ) {
+			wp_add_inline_style( 'rl-library', $rule );
 		}
 		wp_enqueue_script( 'rl-library' );
 		wp_localize_script(
@@ -121,6 +132,7 @@ class RL_Page_Template {
 			'loading'    => __( 'Loading…', 'rl' ),
 			'load_more'  => __( 'Load more', 'rl' ),
 			'no_results' => __( 'No resources found.', 'rl' ),
+			'error'      => __( 'Something went wrong. Please reload the page.', 'rl' ),
 			'featured'   => __( 'Featured Resources', 'rl' ),
 			'favourites' => __( 'Favourites', 'rl' ),
 			'link_copied' => __( 'Link copied', 'rl' ),

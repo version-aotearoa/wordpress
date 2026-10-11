@@ -4,7 +4,7 @@ Tags: resources, custom post type, ajax, library
 Requires at least: 5.8
 Tested up to: 6.6
 Requires PHP: 7.4
-Stable tag: 1.1.24
+Stable tag: 1.1.35
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -54,7 +54,55 @@ Yes. Instead of the page template, add the `[resources_library]` shortcode to a 
 
 If the Frontend User Registration plugin is active, enable "Resources" under Members -> Registration -> Settings -> Member Access to make the whole section Members-only.
 
+= Can some resources be public while the rest are members-only? =
+
+Yes. Enable "Public Featured Resources" in Resources -> Settings. Logged-out visitors can then view the Featured Resources grid and open featured resources. The sections list stays visible; clicking a section (or opening a non-featured resource) loads an in-page login form in the content area instead of redirecting. Requires the Frontend User Registration plugin.
+
 == Changelog ==
+
+= 1.1.35 =
+* Fix: the in-page members login prompt no longer gets replaced by "No resources found." when browsing sections or Favourites. The AJAX listing and single views no longer require a nonce, so a stale nonce on a cached (logged-out) page can't suppress the prompt.
+
+= 1.1.34 =
+* A resource opened from a shared/direct link now shows "Show all [section]" in its back link, using the resource's first tag by section order, and the matching section is highlighted in the sidebar.
+* Resources with no tag keep the "Show all Resources" back link.
+
+= 1.1.33 =
+* Opening a resource ("View resource", the card title or its image) now scrolls the page back to the top.
+
+= 1.1.32 =
+* Downloadable-file cards now have a clickable title again (opening the resource page), alongside the Download button.
+* Selecting a section (or Favourites / Featured) now scrolls the page back to the top on all screen sizes.
+
+= 1.1.31 =
+* Resource Tags and Resource Formats are now shown inside the "Resource Settings" meta box (below the file setting) instead of their own side boxes, so all resource options are in one place.
+* The "Resource Settings" box is kept at the top of the side column even when a user has a previously saved meta box order.
+
+= 1.1.30 =
+* New "Downloadable file" option in the resource editor (Resources -> edit a resource -> Resource Settings) that attaches a document from the Media Library (pdf, doc, docx, xls, xlsx, ppt, pptx, zip, csv, txt, rtf).
+* The "Library Options" meta box has been renamed "Resource Settings" and moved to the top of the editor sidebar, above Resource Tags.
+* Resources with a downloadable file now show a "Download PDF" / "Download DOCX" style button on cards and single pages instead of a title link and format badge.
+* Existing resources that use a WordPress File block in their content are still detected.
+
+= 1.1.29 =
+* Single resource pages no longer display the resource image; videos keep a "Play video" button.
+* New "View resource" button at the bottom of each card: external links open in a new tab, other resources open the resource page.
+* Card format badges now sit below the title.
+* The "Default featured image" now applies to cards only.
+
+= 1.1.28 =
+* New "Default featured image" setting (Resources -> Settings): resource cards and single pages with no featured image of their own use the selected image. For video resources the default image acts as the play thumbnail.
+* New "Featured Resources" item at the top of the sidebar, linking back to the default view above Favourites.
+
+= 1.1.27 =
+* With "Public Featured Resources" enabled, the Favourites item is now shown to logged-out visitors; clicking it loads the members login form in the content area (landing back on Favourites after login).
+
+= 1.1.26 =
+* New "Public Featured Resources" setting (Resources -> Settings): logged-out visitors can view the Featured Resources grid and open featured resources. The sections list stays visible; clicking a section, opening a non-featured resource, or using Favourites loads the members login form in the content area instead of redirecting. Works with the Frontend User Registration "Member content page" and "Members-only content" restrictions.
+
+= 1.1.25 =
+* New "Light accent" and "Dark accent" colour settings: active tags, chips and buttons now use soft backgrounds with dark accent text, and expanded parent arrows show a clear active state.
+* Parent section arrows now show a clear active style when expanded instead of a lingering hover background.
 
 = 1.1.24 =
 * Mobile: selecting Favourites now scrolls the results to the top like selecting a section, and the scroll position clears the floating header so section titles stay visible.

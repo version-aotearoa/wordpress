@@ -120,7 +120,7 @@ class FEUR_Shortcode {
 		if ( $redirect ) {
 			$html .= '<input type="hidden" name="redirect_to" value="' . esc_attr( $redirect ) . '">';
 		}
-		$html .= '<p><button type="submit" class="feur-button">' . esc_html__( 'Email me a login link', 'feur' ) . '</button></p>';
+		$html .= '<p><button type="submit" class="feur-button">' . esc_html__( 'Send login link', 'feur' ) . '</button></p>';
 		$html .= '</form>';
 		return $html;
 	}

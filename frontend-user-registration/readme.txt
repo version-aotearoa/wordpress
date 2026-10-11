@@ -4,7 +4,7 @@ Tags: registration, members, magic login, user fields
 Requires at least: 5.8
 Tested up to: 6.6
 Requires PHP: 7.4
-Stable tag: 1.1.6
+Stable tag: 1.1.7
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -43,6 +43,9 @@ New accounts are created with the Members role. If admin approval is enabled, th
 Yes. Under Members -> Registration -> Settings, enable the "Members only" toggle for any public post type. Non-members are redirected to the account page.
 
 == Changelog ==
+
+= 1.1.7 =
+* Added `feur_skip_access_page` and `feur_skip_post_type_restriction` filters so other plugins can allow specific requests through the Members-only redirects (used by Resources Library to show public Featured Resources with an in-page login prompt).
 
 = 1.1.6 =
 * Admin UI now lives under a new top-level "Members" menu (All Members + Registration) instead of being nested under Users.

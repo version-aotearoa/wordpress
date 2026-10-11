@@ -9,8 +9,11 @@ final class RL_Plugin {
 
 	const FEATURED_META = 'rl_featured';
 	const URL_META = 'rl_url';
+	const FILE_META = 'rl_file';
 
 	const FORMATS = array( 'Video', 'Link', 'Article' );
+
+	const FILE_TYPES = array( 'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'zip', 'csv', 'txt', 'rtf' );
 
 	const VERSION_OPTION = 'rl_version';
 	const SETTINGS_OPTION = 'rl_settings';
@@ -19,6 +22,10 @@ final class RL_Plugin {
 		'posts_per_page'    => 6,
 		'recent_tags_count' => 10,
 		'accent_color'      => '#2271b1',
+		'light_accent'      => '#e9f1f7',
+		'dark_accent'       => '#135e96',
+		'public_featured'   => 0,
+		'default_image'     => 0,
 	);
 
 	private static $instance = null;
@@ -29,6 +36,7 @@ final class RL_Plugin {
 		new RL_Meta();
 		new RL_Ajax();
 		new RL_Page_Template();
+		new RL_Access();
 		new RL_Admin_Columns();
 		new RL_Settings();
 		new RL_Reorder();

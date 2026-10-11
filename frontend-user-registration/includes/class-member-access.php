@@ -26,7 +26,7 @@ class FEUR_Member_Access {
 		}
 
 		$access_page_id = (int) FEUR_Plugin::get_setting( 'access_page_id', 0 );
-		if ( $access_page_id && is_page( $access_page_id ) ) {
+		if ( $access_page_id && is_page( $access_page_id ) && ! apply_filters( 'feur_skip_access_page', false ) ) {
 			$url = add_query_arg( array( 'redirect_to' => get_permalink(), 'fe_status' => 'members_only' ), FEUR_Page_Installer::get_url() );
 			wp_safe_redirect( $url );
 			exit;
@@ -47,7 +47,7 @@ class FEUR_Member_Access {
 			}
 		}
 
-		if ( $target ) {
+		if ( $target && ! apply_filters( 'feur_skip_post_type_restriction', false, $target ) ) {
 			$url = add_query_arg( array( 'redirect_to' => $target, 'fe_status' => 'members_only' ), FEUR_Page_Installer::get_url() );
 			wp_safe_redirect( $url );
 			exit;
