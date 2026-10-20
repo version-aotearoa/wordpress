@@ -26,6 +26,7 @@ final class RL_Plugin {
 		'dark_accent'       => '#135e96',
 		'public_featured'   => 0,
 		'default_image'     => 0,
+		'hide_top_arrows'   => 0,
 	);
 
 	private static $instance = null;
@@ -36,6 +37,7 @@ final class RL_Plugin {
 		new RL_Meta();
 		new RL_Ajax();
 		new RL_Page_Template();
+		new RL_Cache();
 		new RL_Access();
 		new RL_Admin_Columns();
 		new RL_Settings();

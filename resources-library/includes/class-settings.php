@@ -29,6 +29,7 @@ class RL_Settings {
 		add_settings_section( 'rl_settings_main', __( 'Library Settings', 'rl' ), '__return_false', 'rl-settings' );
 		add_settings_field( 'posts_per_page', __( 'Cards per page', 'rl' ), array( $this, 'field_posts_per_page' ), 'rl-settings', 'rl_settings_main' );
 		add_settings_field( 'recent_tags_count', __( 'Recent tags count', 'rl' ), array( $this, 'field_recent_tags_count' ), 'rl-settings', 'rl_settings_main' );
+		add_settings_field( 'hide_top_arrows', __( 'Top-level section arrows', 'rl' ), array( $this, 'field_hide_top_arrows' ), 'rl-settings', 'rl_settings_main' );
 		add_settings_field( 'accent_color', __( 'Accent colour', 'rl' ), array( $this, 'field_accent_color' ), 'rl-settings', 'rl_settings_main' );
 		add_settings_field( 'light_accent', __( 'Light accent', 'rl' ), array( $this, 'field_light_accent' ), 'rl-settings', 'rl_settings_main' );
 		add_settings_field( 'dark_accent', __( 'Dark accent', 'rl' ), array( $this, 'field_dark_accent' ), 'rl-settings', 'rl_settings_main' );
@@ -60,6 +61,12 @@ class RL_Settings {
 		$value = (int) RL_Plugin::get_setting( 'recent_tags_count', 10 );
 		echo '<input type="number" min="1" step="1" name="' . esc_attr( RL_Plugin::SETTINGS_OPTION ) . '[recent_tags_count]" value="' . esc_attr( $value ) . '" class="small-text"> ';
 		echo '<p class="description">' . esc_html__( 'How many recently used tags appear in the resource editor.', 'rl' ) . '</p>';
+	}
+
+	public function field_hide_top_arrows() {
+		$value = (bool) RL_Plugin::get_setting( 'hide_top_arrows', 0 );
+		echo '<label><input type="checkbox" name="' . esc_attr( RL_Plugin::SETTINGS_OPTION ) . '[hide_top_arrows]" value="1"' . checked( $value, true, false ) . '> ' . esc_html__( 'Hide the collapse arrow for top-level sections', 'rl' ) . '</label>';
+		echo '<p class="description">' . esc_html__( 'Top-level sections always keep their child sections visible. Arrows inside child sections are unaffected.', 'rl' ) . '</p>';
 	}
 
 	public function field_accent_color() {
@@ -135,6 +142,8 @@ class RL_Settings {
 		$settings['dark_accent'] = self::sanitize_hex( $dark, '#135e96' );
 
 		$settings['public_featured'] = empty( $input['public_featured'] ) ? 0 : 1;
+
+		$settings['hide_top_arrows'] = empty( $input['hide_top_arrows'] ) ? 0 : 1;
 
 		$settings['default_image'] = isset( $input['default_image'] ) ? absint( $input['default_image'] ) : 0;
 

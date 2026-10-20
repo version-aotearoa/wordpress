@@ -4,7 +4,7 @@ Tags: resources, custom post type, ajax, library
 Requires at least: 5.8
 Tested up to: 6.6
 Requires PHP: 7.4
-Stable tag: 1.1.35
+Stable tag: 1.1.43
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -59,6 +59,33 @@ If the Frontend User Registration plugin is active, enable "Resources" under Mem
 Yes. Enable "Public Featured Resources" in Resources -> Settings. Logged-out visitors can then view the Featured Resources grid and open featured resources. The sections list stays visible; clicking a section (or opening a non-featured resource) loads an in-page login form in the content area instead of redirecting. Requires the Frontend User Registration plugin.
 
 == Changelog ==
+
+= 1.1.43 =
+* Mobile: selecting a leaf section, Favourites or Featured Resources collapses the section menu and scrolls the results to the top. Selecting a section that reveals child sections keeps the menu open and leaves the scroll position alone.
+
+= 1.1.42 =
+* Fix: selecting a section that was previously collapsed now expands it and shows its child sections, matching the section arrow. Works at every depth and on mobile.
+
+= 1.1.41 =
+* Developer note: documented why the read-only library AJAX endpoints intentionally skip nonce checks (a stale nonce on a cached page used to replace the members login prompt with "No resources found."). See `docs/login-prompt-nonce.md`.
+
+= 1.1.40 =
+* Mobile: the section menu is now a left-aligned vertical list with child sections indented under their parent, instead of a wrapped row of chips. Long section names no longer overflow the screen.
+* Mobile: the section menu starts minimised on load; tap "Sections" to open it. The Sections chevron now points down when closed and up when open.
+
+= 1.1.39 =
+* Open section arrows no longer have the tinted background behind them.
+
+= 1.1.38 =
+* New "Hide top-level section arrows" setting (Resources -> Settings): top-level sections keep their child sections permanently visible instead of showing a collapse arrow. Arrows inside child sections are unaffected.
+
+= 1.1.37 =
+* The sidebar now shows top-level sections with their first-level child sections visible by default; deeper levels still expand via the section arrow.
+* Child sections display a resource count (including resources in their own child sections). Top-level sections with visible children omit the count, and zero counts are hidden.
+* Fix: arrows for child sections no longer appear on their own when the parent section is collapsed, and collapsing a section now hides all of its descendants.
+
+= 1.1.36 =
+* Fix: publishing, trashing, re-tagging/re-formatting a resource, or toggling its "Featured" flag now purges the Cloudways Varnish/Breeze cache for the Resource Library page and its affected section/format views, so new and newly-featured resources appear immediately.
 
 = 1.1.35 =
 * Fix: the in-page members login prompt no longer gets replaced by "No resources found." when browsing sections or Favourites. The AJAX listing and single views no longer require a nonce, so a stale nonce on a cached (logged-out) page can't suppress the prompt.

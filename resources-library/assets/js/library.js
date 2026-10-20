@@ -121,13 +121,12 @@
 	updateSidebar();
 	initEditBar();
 
-	// Auto-minimise on load with an active section removed: keep the list visible.
-	// if (state.tag && isMobileView() && sidebar) {
-	// 	sidebar.classList.add('rl-minimized');
-	// 	if (sidebarToggle) {
-	// 		sidebarToggle.setAttribute('aria-expanded', 'false');
-	// 	}
-	// }
+	if (isMobileView() && sidebar) {
+		sidebar.classList.add('rl-minimized');
+		if (sidebarToggle) {
+			sidebarToggle.setAttribute('aria-expanded', 'false');
+		}
+	}
 
 	function parseState() {
 		var params = new URLSearchParams(window.location.search);
@@ -178,7 +177,7 @@
 			}
 			if (title) {
 				if (state.tag) {
-					var tagEl = document.querySelector('[data-tag="' + state.tag + '"]');
+					var tagEl = document.querySelector('[data-tag="' + state.tag + '"] .rl-tag-label');
 					title.textContent = tagEl ? tagEl.textContent.replace(/^\s+|\s+$/g, '') : baseTitle;
 				} else if (state.favourites) {
 					title.textContent = window.rl_library.favourites;
@@ -251,7 +250,7 @@
 		setTimeout(finish, 600);
 	}
 
-	function updateSidebar() {
+	function activeChain() {
 		var bySlug = {};
 		document.querySelectorAll('[data-tag]').forEach(function (el) {
 			bySlug[el.getAttribute('data-tag')] = el;
@@ -266,39 +265,77 @@
 			}
 			slug = parent;
 		}
-		function inChain(s) {
-			return chain.indexOf(s) !== -1;
+		return chain;
+	}
+
+	function depthOf(slug) {
+		var row = document.querySelector('.rl-tag-row[data-row="' + slug + '"]');
+		return row ? (parseInt(row.getAttribute('data-depth'), 10) || 0) : 0;
+	}
+
+	function isOpenState(slug) {
+		if (typeof expanded[slug] !== 'undefined') {
+			return expanded[slug];
 		}
-		function isOpen(parentSlug) {
-			if (typeof expanded[parentSlug] !== 'undefined') {
-				return expanded[parentSlug];
+		if (depthOf(slug) === 0) {
+			return true;
+		}
+		return activeChain().indexOf(slug) !== -1;
+	}
+
+	function updateSidebar() {
+		var rows = {};
+		document.querySelectorAll('.rl-tag-row[data-row]').forEach(function (row) {
+			rows[row.getAttribute('data-row')] = row;
+		});
+
+		function rowVisible(slug) {
+			var row = rows[slug];
+			if (!row) {
+				return true;
 			}
-			return inChain(parentSlug);
-		}
-		document.querySelectorAll('[data-tag]').forEach(function (el) {
-			var s = el.getAttribute('data-tag');
-			var parent = el.getAttribute('data-parent');
-			var visible;
+			var parent = row.getAttribute('data-parent');
 			if (!parent) {
-				visible = true;
-			} else if (inChain(s)) {
-				visible = true;
-			} else {
-				visible = isOpen(parent);
+				return true;
 			}
-			el.classList.toggle('is-visible', visible);
+			if (!isOpenState(parent)) {
+				return false;
+			}
+			return rowVisible(parent);
+		}
+
+		Object.keys(rows).forEach(function (slug) {
+			rows[slug].classList.toggle('is-visible', rowVisible(slug));
 		});
 		document.querySelectorAll('.rl-tag-arrow').forEach(function (btn) {
 			var s = btn.getAttribute('data-arrow');
-			var open = isOpen(s);
+			var open = isOpenState(s);
 			btn.setAttribute('aria-expanded', open ? 'true' : 'false');
 			btn.classList.toggle('is-open', open);
 		});
 	}
 
 	function toggleChildren(slug) {
-		expanded[slug] = expanded[slug] ? false : true;
+		expanded[slug] = !isOpenState(slug);
 		updateSidebar();
+	}
+
+	function expandSection(slug) {
+		expanded[slug] = true;
+		var link = document.querySelector('[data-tag="' + slug + '"]');
+		while (link) {
+			var parent = link.getAttribute('data-parent');
+			if (!parent) {
+				break;
+			}
+			expanded[parent] = true;
+			link = document.querySelector('[data-tag="' + parent + '"]');
+		}
+		updateSidebar();
+	}
+
+	function sectionHasChildren(slug) {
+		return !!document.querySelector('.rl-tag-row[data-parent="' + slug + '"]');
 	}
 
 	function isMobileView() {
@@ -306,7 +343,12 @@
 	}
 
 	function minimizeSidebar() {
-		// Auto-minimise removed: keep the section list visible on selection.
+		if (isMobileView() && sidebar) {
+			sidebar.classList.add('rl-minimized');
+			if (sidebarToggle) {
+				sidebarToggle.setAttribute('aria-expanded', 'false');
+			}
+		}
 		window.scrollTo({ top: 0, behavior: 'smooth' });
 	}
 
@@ -616,8 +658,12 @@
 	document.querySelectorAll('[data-tag]').forEach(function (el) {
 		el.addEventListener('click', function (e) {
 			e.preventDefault();
-			go({ tag: el.getAttribute('data-tag'), format: '', page: 1, favourites: false }, false);
-			minimizeSidebar();
+			var slug = el.getAttribute('data-tag');
+			expandSection(slug);
+			go({ tag: slug, format: '', page: 1, favourites: false }, false);
+			if (!sectionHasChildren(slug)) {
+				minimizeSidebar();
+			}
 		});
 	});
 

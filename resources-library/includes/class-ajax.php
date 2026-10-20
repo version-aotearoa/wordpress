@@ -13,6 +13,10 @@ class RL_Ajax {
 	}
 
 	public function handle() {
+		// Intentionally no nonce check: this is a read-only endpoint served from a
+		// page that may be cached for logged-out visitors. WP nonces expire after
+		// 12-24h, and a stale one used to 403 and replace the members login prompt
+		// with "No resources found." See docs/login-prompt-nonce.md.
 		$tag = isset( $_GET['tag'] ) ? sanitize_title( wp_unslash( $_GET['tag'] ) ) : '';
 		$format = isset( $_GET['format'] ) ? sanitize_title( wp_unslash( $_GET['format'] ) ) : '';
 		$paged = isset( $_GET['page'] ) ? absint( $_GET['page'] ) : 1;
@@ -52,6 +56,8 @@ class RL_Ajax {
 	}
 
 	public function single() {
+		// Intentionally no nonce check: read-only endpoint, same caching/nonce
+		// problem as handle(). See docs/login-prompt-nonce.md.
 		$post_id = isset( $_GET['post_id'] ) ? absint( $_GET['post_id'] ) : 0;
 		$base = isset( $_GET['base'] ) ? esc_url_raw( wp_unslash( $_GET['base'] ) ) : '';
 		$tag = isset( $_GET['tag'] ) ? sanitize_title( wp_unslash( $_GET['tag'] ) ) : '';

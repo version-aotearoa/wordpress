@@ -128,9 +128,10 @@ class RL_Render {
 				'taxonomy'   => RL_Plugin::TAG_TAX,
 				'hide_empty' => false,
 				'orderby'    => 'name',
+				'pad_counts' => true,
 			)
 		);
-		$html = '<aside class="rl-sidebar" id="rl-sidebar">';
+		$html = '<aside class="rl-sidebar rl-minimized" id="rl-sidebar">';
 		$html .= '<h2 class="rl-sidebar-title">' . esc_html__( 'Resource Library', 'rl' ) . '</h2>';
 		$feat_link = add_query_arg( array( 'tag' => false, 'format' => false, 'favourites' => false, 'page' => false ), $base_url );
 		$feat_class = 'rl-tag rl-featured-nav' . ( ( '' === $tag_slug && ! $favourites ) ? ' rl-tag-active' : '' );
@@ -143,9 +144,16 @@ class RL_Render {
 		if ( ! is_wp_error( $tags ) && ! empty( $tags ) ) {
 			$by_parent = self::group_tags( $tags );
 			$visible_slugs = self::ancestor_slugs( $tag_slug );
+			$open_slugs = $visible_slugs;
+			if ( ! empty( $by_parent[0] ) ) {
+				foreach ( $by_parent[0] as $top_tag ) {
+					$open_slugs[] = $top_tag->slug;
+				}
+			}
+			$hide_top_arrows = (bool) RL_Plugin::get_setting( 'hide_top_arrows', 0 );
 			$html .= '<h3 class="rl-sidebar-sections"><button type="button" class="rl-sidebar-toggle" aria-expanded="true" aria-controls="rl-tag-nav">' . esc_html__( 'Sections', 'rl' ) . '</button></h3>';
 			$html .= '<nav class="rl-tag-nav" id="rl-tag-nav" aria-label="' . esc_attr__( 'Resource sections', 'rl' ) . '">';
-			$html .= self::tag_list_html( $by_parent, 0, '', $tag_slug, $format_slug, $base_url, $visible_slugs );
+			$html .= self::tag_list_html( $by_parent, 0, '', $tag_slug, $format_slug, $base_url, 0, true, $open_slugs, $hide_top_arrows );
 			$html .= '</nav>';
 		} else {
 			$html .= '<p>' . esc_html__( 'No sections yet.', 'rl' ) . '</p>';
@@ -201,7 +209,7 @@ class RL_Render {
 		return $slugs;
 	}
 
-	private static function tag_list_html( $by_parent, $parent_id, $parent_slug, $tag_slug, $format_slug, $base_url, $visible_slugs = array() ) {
+	private static function tag_list_html( $by_parent, $parent_id, $parent_slug, $tag_slug, $format_slug, $base_url, $depth = 0, $parent_visible = true, $open_slugs = array(), $hide_top_arrows = false ) {
 		$html = '';
 		if ( empty( $by_parent[ $parent_id ] ) ) {
 			return $html;
@@ -211,21 +219,38 @@ class RL_Render {
 			$link = add_query_arg( array( 'tag' => $tag->slug, 'page' => false ), $base_url );
 			$link = $format_slug ? add_query_arg( 'format', $format_slug, $link ) : remove_query_arg( 'format', $link );
 			$class = 'rl-tag' . ( $tag->slug === $tag_slug ? ' rl-tag-active' : '' );
-			if ( in_array( $tag->slug, $visible_slugs, true ) ) {
-				$class .= ' is-visible';
-			}
 			$data_parent = '';
-			if ( $parent_id ) {
+			if ( $depth > 0 ) {
 				$class .= ' rl-tag-child';
 				$data_parent = ' data-parent="' . esc_attr( $parent_slug ) . '"';
 			}
-			$html .= '<div class="rl-tag-row">';
-			$html .= '<a href="' . esc_url( $link ) . '" class="' . esc_attr( $class ) . '" data-tag="' . esc_attr( $tag->slug ) . '"' . $data_parent . '>' . esc_html( $tag->name ) . '</a>';
-			if ( $has_children ) {
-				$html .= '<button type="button" class="rl-tag-arrow" data-arrow="' . esc_attr( $tag->slug ) . '" aria-expanded="false" aria-label="' . esc_attr( sprintf( __( 'Toggle children of %s', 'rl' ), $tag->name ) ) . '"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M9 5l7 7-7 7V5z"/></svg></button>';
+			$row_class = 'rl-tag-row';
+			if ( $depth > 0 ) {
+				$row_class .= ' rl-tag-child-row';
+			}
+			$row_visible = ( 0 === $depth ) || ( $parent_visible && in_array( $parent_slug, $open_slugs, true ) );
+			if ( $row_visible ) {
+				$row_class .= ' is-visible';
+			}
+			$row_attrs = ' data-row="' . esc_attr( $tag->slug ) . '" data-depth="' . esc_attr( $depth ) . '"';
+			if ( $depth > 0 ) {
+				$row_attrs .= ' data-parent="' . esc_attr( $parent_slug ) . '"';
+			}
+			$show_count = ! ( 0 === $depth && $has_children ) && (int) $tag->count > 0;
+			$is_open = ( 0 === $depth ) || in_array( $tag->slug, $open_slugs, true );
+
+			$html .= '<div class="' . esc_attr( $row_class ) . '"' . $row_attrs . '>';
+			$html .= '<a href="' . esc_url( $link ) . '" class="' . esc_attr( $class ) . '" data-tag="' . esc_attr( $tag->slug ) . '"' . $data_parent . '>';
+			$html .= '<span class="rl-tag-label">' . esc_html( $tag->name ) . '</span>';
+			if ( $show_count ) {
+				$html .= '<span class="rl-tag-count">' . esc_html( number_format_i18n( (int) $tag->count ) ) . '</span>';
+			}
+			$html .= '</a>';
+			if ( $has_children && ! ( 0 === $depth && $hide_top_arrows ) ) {
+				$html .= '<button type="button" class="rl-tag-arrow' . ( $is_open ? ' is-open' : '' ) . '" data-arrow="' . esc_attr( $tag->slug ) . '" aria-expanded="' . ( $is_open ? 'true' : 'false' ) . '" aria-label="' . esc_attr( sprintf( __( 'Toggle children of %s', 'rl' ), $tag->name ) ) . '"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M9 5l7 7-7 7V5z"/></svg></button>';
 			}
 			$html .= '</div>';
-			$html .= self::tag_list_html( $by_parent, (int) $tag->term_id, $tag->slug, $tag_slug, $format_slug, $base_url, $visible_slugs );
+			$html .= self::tag_list_html( $by_parent, (int) $tag->term_id, $tag->slug, $tag_slug, $format_slug, $base_url, $depth + 1, $row_visible, $open_slugs, $hide_top_arrows );
 		}
 		return $html;
 	}
