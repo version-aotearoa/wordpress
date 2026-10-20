@@ -1,0 +1,88 @@
+.ga-profile,
+.ga-archive {
+	max-width: 760px;
+	margin: 0 auto;
+	padding: 1.5rem 1rem;
+}
+
+.ga-profile-avatar img,
+.ga-card-avatar img,
+.ga-author-box-avatar img {
+	border-radius: 50%;
+	display: block;
+}
+
+.ga-profile-avatar img {
+	width: 120px;
+	height: 120px;
+	object-fit: cover;
+}
+
+.ga-profile-role,
+.ga-card-role,
+.ga-author-box-role {
+	color: #646970;
+	margin: 0.25em 0 0.75em;
+}
+
+.ga-profile-links {
+	display: flex;
+	gap: 1rem;
+	margin: 0.75rem 0 1.5rem;
+	padding: 0;
+	list-style: none;
+}
+
+.ga-post-list {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.ga-post-list li {
+	display: flex;
+	justify-content: space-between;
+	gap: 1rem;
+	padding: 0.5rem 0;
+	border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.ga-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+	gap: 1.25rem;
+}
+
+.ga-card-link {
+	display: block;
+	padding: 1rem;
+	text-align: center;
+	text-decoration: none;
+	color: inherit;
+	border: 1px solid rgba(0, 0, 0, 0.08);
+	border-radius: 8px;
+}
+
+.ga-card-avatar img {
+	width: 96px;
+	height: 96px;
+	margin: 0 auto 0.75rem;
+}
+
+.ga-author-box {
+	display: flex;
+	gap: 1rem;
+	padding: 1rem;
+	border: 1px solid rgba(0, 0, 0, 0.08);
+	border-radius: 8px;
+}
+
+.ga-author-box-avatar img {
+	width: 72px;
+	height: 72px;
+}
+
+.ga-author-box-name {
+	margin: 0;
+	font-weight: 600;
+}

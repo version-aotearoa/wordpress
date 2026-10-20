@@ -1,0 +1,49 @@
+.ga-coauthors-list {
+	margin: 0 0 8px;
+	padding: 0;
+	list-style: none;
+}
+
+.ga-coauthor {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	padding: 5px 8px;
+	margin-bottom: 4px;
+	background: #f6f7f7;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+}
+
+.ga-coauthor .ga-handle {
+	display: inline-flex;
+	color: #8c8f94;
+	cursor: move;
+}
+
+.ga-coauthor-name {
+	flex: 1 1 auto;
+}
+
+.ga-coauthor .ga-remove {
+	color: #b32d2e;
+	font-size: 16px;
+	line-height: 1;
+	text-decoration: none;
+}
+
+.ga-coauthors-add {
+	display: flex;
+	gap: 6px;
+}
+
+.ga-coauthor-picker {
+	flex: 1 1 auto;
+	max-width: 100%;
+}
+
+.ga-coauthor-placeholder {
+	height: 34px;
+	background: #e9f1f7;
+	border: 1px dashed #2271b1;
+}

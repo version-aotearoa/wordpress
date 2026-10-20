@@ -20,7 +20,15 @@ Features include:
 - Members-only support via the Frontend User Registration plugin
 
 ### Contact Form 7 Submissions
-Saves Contact Form 7 submissions to the database with an admin list, detail view and CSV export.
+Saves Contact Form 7 submissions to the database with an admin list under Contact -> Submissions, a detail view, CSV export and a summary card on the Contact Form 7 Dashboard. Supports Contact Form 7 6.2+.
+
+### Guest Authors
+Attribute posts to one or more guest author identities without creating WordPress users. Guest authors are a custom post type with their own profile, archive and single pages; the real staff user stays the post author and only the public byline is swapped.
+
+- Reorderable multi-author byline box on posts
+- Public archive at `/guest-authors/` and profiles at `/guest-author/{slug}/`
+- Avatar from featured image, with Gravatar fallback
+- Template tags and `[ga_byline]` / `[ga_author_box]` shortcodes
 
 ## Installation
 
