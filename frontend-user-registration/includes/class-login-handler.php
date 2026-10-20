@@ -8,11 +8,8 @@ class FEUR_Login_Handler {
 	}
 
 	public function maybe_request_link() {
-		if ( empty( $_POST['feur_login'] ) || empty( $_POST['feur_nonce'] ) ) {
+		if ( empty( $_POST['feur_login'] ) ) {
 			return;
-		}
-		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['feur_nonce'] ) ), 'feur_login' ) ) {
-			$this->redirect( 'invalid_token' );
 		}
 		if ( is_user_logged_in() ) {
 			$redirect = isset( $_POST['redirect_to'] ) ? wp_unslash( $_POST['redirect_to'] ) : '';
@@ -32,6 +29,12 @@ class FEUR_Login_Handler {
 		if ( get_user_meta( $user->ID, 'fe_pending', true ) || get_user_meta( $user->ID, 'fe_denied', true ) ) {
 			$this->redirect( get_user_meta( $user->ID, 'fe_denied', true ) ? 'denied' : 'pending_login' );
 		}
+
+		$rate_key = 'feur_login_' . md5( strtolower( $email ) );
+		if ( get_transient( $rate_key ) ) {
+			$this->redirect( 'link_sent' );
+		}
+		set_transient( $rate_key, 1, MINUTE_IN_SECONDS );
 
 		$redirect = isset( $_POST['redirect_to'] ) ? wp_unslash( $_POST['redirect_to'] ) : '';
 		$token = FEUR_Magic_Link::issue( $user->ID );

@@ -5,6 +5,7 @@ global $wpdb;
 
 delete_option( 'feur_settings' );
 delete_option( 'feur_fields' );
+delete_option( 'feur_version' );
 
 $page_id = (int) get_option( 'feur_account_page_id' );
 if ( $page_id ) {
@@ -21,4 +22,11 @@ $wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LI
 
 if ( get_role( 'member' ) ) {
 	remove_role( 'member' );
+}
+if ( get_role( 'members_manager' ) ) {
+	remove_role( 'members_manager' );
+}
+$admin_role = get_role( 'administrator' );
+if ( $admin_role && $admin_role->has_cap( 'feur_manage_members' ) ) {
+	$admin_role->remove_cap( 'feur_manage_members' );
 }

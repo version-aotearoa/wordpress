@@ -8,11 +8,8 @@ class FEUR_Registration_Handler {
 	}
 
 	public function maybe_register() {
-		if ( empty( $_POST['feur_register'] ) || empty( $_POST['feur_nonce'] ) ) {
+		if ( empty( $_POST['feur_register'] ) ) {
 			return;
-		}
-		if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['feur_nonce'] ) ), 'feur_register' ) ) {
-			$this->fail( array( __( 'Invalid security token. Please try again.', 'feur' ) ), array() );
 		}
 		if ( is_user_logged_in() ) {
 			$this->success();
@@ -22,7 +19,7 @@ class FEUR_Registration_Handler {
 		$values = array();
 
 		if ( ! empty( $_POST['feur_honeypot'] ) ) {
-			$this->fail( array(), array() );
+			$this->fail( array( __( 'Registration could not be processed. Please try again.', 'feur' ) ), array() );
 		}
 
 		$email = sanitize_email( wp_unslash( $_POST['email'] ?? '' ) );

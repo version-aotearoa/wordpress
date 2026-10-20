@@ -4,7 +4,7 @@ Tags: registration, members, magic login, user fields
 Requires at least: 5.8
 Tested up to: 6.6
 Requires PHP: 7.4
-Stable tag: 1.1.7
+Stable tag: 1.1.9
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -36,13 +36,37 @@ Members request a magic login link on the Login tab using their email address. T
 
 = What happens after registration? =
 
-New accounts are created with the Members role. If admin approval is enabled, the account is pending until an administrator approves it from Members -> All Members; the member then receives their login link by email.
+New accounts are created with the Members role. If admin approval is enabled, the account is pending until an administrator or Members Manager approves it from Members -> All Members; the member then receives their login link by email.
+
+= Who are the new registration emails sent to? =
+
+Two emails can be sent when someone registers:
+
+* A confirmation goes to the email address the member registered with, telling them their account is awaiting approval. This is the "Pending notice" setting.
+* A notification goes to the recipients chosen under "Notify who": either the site's Administration Email Address (set in Settings -> General), or all administrators and Members Managers. This is the "Admin notification" setting; when set to all administrators and Members Managers, one email is sent to each recipient.
+
+Both can be turned on or off under Members -> Registration -> Settings -> Emails. After an administrator approves the account, the member is emailed their single-use login link (the "Magic link email" setting).
+
+= How do I delegate member management? =
+
+Promote a member to Members Manager using "Promote to Manager" on the Members page. Members Managers can approve, deny, and set members pending; edit member names and custom fields; manage registration fields and settings; and view Members-only content. They cannot manage plugins, themes, or other site settings, cannot change a member's role, and cannot change the default registration role (administrators only). Only administrators can demote a Members Manager, and nobody can demote themselves.
 
 = Can I restrict content to members? =
 
 Yes. Under Members -> Registration -> Settings, enable the "Members only" toggle for any public post type. Non-members are redirected to the account page.
 
 == Changelog ==
+
+= 1.1.9 =
+* New Members Manager role for delegated member management: approve, deny, and set pending; edit member names and custom fields; manage registration fields and settings; and view Members-only content - without full administrator access.
+* Members Managers can promote a member to Members Manager. Only administrators can demote a Members Manager, and self-demotion is blocked.
+* New "Notify who" setting under Emails: send new-registration notifications to the Administration Email Address, or to all administrators and Members Managers (one email per recipient, de-duplicated).
+* Scoped member editor on the Members page for editing a member's name and custom fields; the login email remains read-only.
+* The default registration role can only be changed by administrators.
+* Fix: registration and login no longer fail silently (no confirmation, no email) when the account page or a page hosting the login form is served from a full-page cache with a stale nonce. The public register and login forms no longer depend on a cached nonce; the login form adds a per-email rate limit.
+* The account page (and any page rendering a Frontend User Registration form) is now excluded from page caching, so confirmation and error messages always render.
+* The honeypot field is hardened against browser/password-manager autofill and now shows a visible message instead of a silent dead-end.
+* Existing cached copies of the account page are purged on update (Cloudways Breeze/Varnish when available).
 
 = 1.1.7 =
 * Added `feur_skip_access_page` and `feur_skip_post_type_restriction` filters so other plugins can allow specific requests through the Members-only redirects (used by Resources Library to show public Featured Resources with an in-page login prompt).

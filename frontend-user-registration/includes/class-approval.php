@@ -12,7 +12,7 @@ class FEUR_Approval {
 	public function approve() {
 		$user_id = isset( $_GET['user'] ) ? absint( $_GET['user'] ) : 0;
 		check_admin_referer( 'feur_approve_' . $user_id );
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! current_user_can( FEUR_Role::MANAGE ) ) {
 			wp_die( esc_html__( 'You are not allowed to do that.', 'feur' ) );
 		}
 		$user = get_user_by( 'id', $user_id );
@@ -30,7 +30,7 @@ class FEUR_Approval {
 	public function deny() {
 		$user_id = isset( $_GET['user'] ) ? absint( $_GET['user'] ) : 0;
 		check_admin_referer( 'feur_deny_' . $user_id );
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! current_user_can( FEUR_Role::MANAGE ) ) {
 			wp_die( esc_html__( 'You are not allowed to do that.', 'feur' ) );
 		}
 		$user = get_user_by( 'id', $user_id );
@@ -46,7 +46,7 @@ class FEUR_Approval {
 	public function pending() {
 		$user_id = isset( $_GET['user'] ) ? absint( $_GET['user'] ) : 0;
 		check_admin_referer( 'feur_pending_' . $user_id );
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! current_user_can( FEUR_Role::MANAGE ) ) {
 			wp_die( esc_html__( 'You are not allowed to do that.', 'feur' ) );
 		}
 		$user = get_user_by( 'id', $user_id );
@@ -119,8 +119,34 @@ class FEUR_Approval {
 			if ( $pending ) {
 				$body .= '<p><a href="' . esc_url( admin_url( 'admin.php?page=feur-members' ) ) . '">' . esc_html__( 'Review pending members', 'feur' ) . '</a></p>';
 			}
-			self::email( get_option( 'admin_email' ), $subject, $body );
+			foreach ( self::admin_recipients() as $recipient ) {
+				self::email( $recipient, $subject, $body );
+			}
 		}
+	}
+
+	private static function admin_recipients() {
+		$recipients = array();
+
+		if ( 'all_admins' === FEUR_Plugin::get_setting( 'admin_notify_recipients', 'admin_email' ) ) {
+			$roles = array();
+			foreach ( wp_roles()->roles as $slug => $role ) {
+				if ( ! empty( $role['capabilities'][ FEUR_Role::MANAGE ] ) ) {
+					$roles[] = $slug;
+				}
+			}
+			if ( $roles ) {
+				foreach ( get_users( array( 'role__in' => $roles ) ) as $user ) {
+					if ( $user instanceof WP_User && $user->has_cap( FEUR_Role::MANAGE ) ) {
+						$recipients[] = $user->user_email;
+					}
+				}
+			}
+		}
+
+		$recipients[] = get_option( 'admin_email' );
+
+		return array_values( array_unique( array_filter( $recipients, 'is_email' ) ) );
 	}
 
 	public static function send_magic_link_email( $user_id, $token, $redirect = '' ) {

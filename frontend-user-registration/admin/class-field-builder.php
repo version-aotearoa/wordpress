@@ -161,7 +161,7 @@ class FEUR_Field_Builder {
 	}
 
 	public function save_field() {
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! current_user_can( FEUR_Role::MANAGE ) ) {
 			wp_die( esc_html__( 'You are not allowed to do that.', 'feur' ) );
 		}
 		check_admin_referer( 'feur_save_field' );
@@ -241,7 +241,7 @@ class FEUR_Field_Builder {
 	public function delete_field() {
 		$id = isset( $_GET['field'] ) ? sanitize_key( wp_unslash( $_GET['field'] ) ) : '';
 		check_admin_referer( 'feur_delete_field_' . $id );
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! current_user_can( FEUR_Role::MANAGE ) ) {
 			wp_die( esc_html__( 'You are not allowed to do that.', 'feur' ) );
 		}
 		FEUR_Field_Repository::delete_field( $id );
@@ -253,7 +253,7 @@ class FEUR_Field_Builder {
 		$id = isset( $_GET['field'] ) ? sanitize_key( wp_unslash( $_GET['field'] ) ) : '';
 		$dir = isset( $_GET['dir'] ) ? (int) $_GET['dir'] : 0;
 		check_admin_referer( 'feur_move_field_' . $id );
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! current_user_can( FEUR_Role::MANAGE ) ) {
 			wp_die( esc_html__( 'You are not allowed to do that.', 'feur' ) );
 		}
 		FEUR_Field_Repository::move( $id, $dir );

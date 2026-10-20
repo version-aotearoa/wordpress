@@ -13,6 +13,7 @@ final class FEUR_Plugin {
 		'terms_text'               => '',
 		'pending_email_enabled'    => 1,
 		'admin_notify_enabled'     => 1,
+		'admin_notify_recipients'  => 'admin_email',
 		'magic_link_email_enabled' => 1,
 		'deny_email_enabled'       => 1,
 		'restricted_post_types'    => array(),
@@ -22,6 +23,7 @@ final class FEUR_Plugin {
 	private function __construct() {
 		add_action( 'init', array( 'FEUR_Role', 'ensure' ) );
 		add_action( 'init', array( 'FEUR_Page_Installer', 'init' ) );
+		add_action( 'init', array( __CLASS__, 'maybe_purge_on_update' ), 5 );
 
 		FEUR_Magic_Link::init();
 		new FEUR_Registration_Handler();
@@ -51,6 +53,16 @@ final class FEUR_Plugin {
 		if ( false === get_option( 'feur_fields', false ) ) {
 			add_option( 'feur_fields', array() );
 		}
+		update_option( 'feur_version', FEUR_VERSION, false );
+		FEUR_Page_Installer::purge_cache();
+	}
+
+	public static function maybe_purge_on_update() {
+		if ( FEUR_VERSION === get_option( 'feur_version' ) ) {
+			return;
+		}
+		update_option( 'feur_version', FEUR_VERSION, false );
+		FEUR_Page_Installer::purge_cache();
 	}
 
 	public static function deactivate() {

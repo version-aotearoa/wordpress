@@ -61,4 +61,19 @@ class FEUR_Page_Installer {
 		}
 		delete_option( self::OPTION );
 	}
+
+	public static function purge_cache() {
+		if ( ! class_exists( 'Breeze_PurgeCache' ) ) {
+			return;
+		}
+		$url = self::get_url();
+		if ( ! $url ) {
+			return;
+		}
+		if ( method_exists( 'Breeze_PurgeCache', 'purge_varnish_urls' ) ) {
+			Breeze_PurgeCache::purge_varnish_urls( array( $url ) );
+		} else {
+			do_action( 'breeze_clear_all_cache' );
+		}
+	}
 }

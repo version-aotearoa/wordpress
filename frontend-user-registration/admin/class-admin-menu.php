@@ -9,6 +9,11 @@ class FEUR_Admin_Menu {
 		$this->field_builder = $field_builder;
 		add_action( 'admin_menu', array( $this, 'menu' ) );
 		add_action( 'admin_init', array( $this, 'register_settings' ) );
+		add_filter( 'option_page_capability_feur_settings_group', array( $this, 'settings_capability' ) );
+	}
+
+	public function settings_capability() {
+		return FEUR_Role::MANAGE;
 	}
 
 	public function menu() {
@@ -16,7 +21,7 @@ class FEUR_Admin_Menu {
 			'feur-members',
 			__( 'Registration', 'feur' ),
 			__( 'Registration', 'feur' ),
-			'manage_options',
+			FEUR_Role::MANAGE,
 			'feur-registration',
 			array( $this, 'render' )
 		);
@@ -64,6 +69,7 @@ class FEUR_Admin_Menu {
 		add_settings_section( 'feur_emails', __( 'Emails', 'feur' ), '__return_false', 'feur-settings' );
 		add_settings_field( 'pending_email_enabled', __( 'Pending notice', 'feur' ), array( $this, 'field_pending_email_enabled' ), 'feur-settings', 'feur_emails' );
 		add_settings_field( 'admin_notify_enabled', __( 'Admin notification', 'feur' ), array( $this, 'field_admin_notify_enabled' ), 'feur-settings', 'feur_emails' );
+		add_settings_field( 'admin_notify_recipients', __( 'Notify who', 'feur' ), array( $this, 'field_admin_notify_recipients' ), 'feur-settings', 'feur_emails' );
 		add_settings_field( 'magic_link_email_enabled', __( 'Magic link email', 'feur' ), array( $this, 'field_magic_link_email_enabled' ), 'feur-settings', 'feur_emails' );
 		add_settings_field( 'deny_email_enabled', __( 'Decline email', 'feur' ), array( $this, 'field_deny_email_enabled' ), 'feur-settings', 'feur_emails' );
 
@@ -82,10 +88,16 @@ class FEUR_Admin_Menu {
 
 	public function field_default_role() {
 		$current = FEUR_Plugin::get_setting( 'default_role', 'member' );
+		if ( ! current_user_can( 'manage_options' ) ) {
+			$role_name = isset( wp_roles()->roles[ $current ]['name'] ) ? wp_roles()->roles[ $current ]['name'] : $current;
+			echo '<strong>' . esc_html( translate_user_role( $role_name ) ) . '</strong>';
+			echo '<p class="description">' . esc_html__( 'Only administrators can change the default registration role.', 'feur' ) . '</p>';
+			return;
+		}
 		$roles = get_editable_roles();
 		echo '<select name="feur_settings[default_role]">';
 		foreach ( $roles as $key => $role ) {
-			if ( empty( $role['capabilities']['read'] ) ) {
+			if ( empty( $role['capabilities']['read'] ) || FEUR_Role::MANAGER === $key ) {
 				continue;
 			}
 			echo '<option value="' . esc_attr( $key ) . '"' . selected( $current, $key, false ) . '>' . esc_html( translate_user_role( $role['name'] ) ) . '</option>';
@@ -117,6 +129,20 @@ class FEUR_Admin_Menu {
 
 	public function field_admin_notify_enabled() {
 		$this->field_checkbox( 'admin_notify_enabled', __( 'Notify the admin by email when someone registers.', 'feur' ) );
+	}
+
+	public function field_admin_notify_recipients() {
+		$current = FEUR_Plugin::get_setting( 'admin_notify_recipients', 'admin_email' );
+		$options = array(
+			'admin_email' => __( 'Administration Email Address (Settings -> General)', 'feur' ),
+			'all_admins'  => __( 'All administrators and Members Managers', 'feur' ),
+		);
+		echo '<select name="feur_settings[admin_notify_recipients]">';
+		foreach ( $options as $value => $label ) {
+			echo '<option value="' . esc_attr( $value ) . '"' . selected( $current, $value, false ) . '>' . esc_html( $label ) . '</option>';
+		}
+		echo '</select>';
+		echo '<p class="description">' . esc_html__( 'Where "New registration" notifications are sent.', 'feur' ) . '</p>';
 	}
 
 	public function field_magic_link_email_enabled() {
@@ -170,8 +196,13 @@ class FEUR_Admin_Menu {
 
 		$settings['require_approval'] = ! empty( $input['require_approval'] ) ? 1 : 0;
 
-		$role = isset( $input['default_role'] ) ? sanitize_key( $input['default_role'] ) : 'member';
-		$settings['default_role'] = get_role( $role ) ? $role : 'member';
+		if ( current_user_can( 'manage_options' ) ) {
+			$role = isset( $input['default_role'] ) ? sanitize_key( $input['default_role'] ) : 'member';
+			if ( ! get_role( $role ) || FEUR_Role::MANAGER === $role ) {
+				$role = 'member';
+			}
+			$settings['default_role'] = $role;
+		}
 
 		$expiry = isset( $input['magic_link_expiry'] ) ? absint( $input['magic_link_expiry'] ) : 48;
 		$settings['magic_link_expiry'] = max( 1, $expiry );
@@ -181,6 +212,9 @@ class FEUR_Admin_Menu {
 
 		$settings['pending_email_enabled'] = ! empty( $input['pending_email_enabled'] ) ? 1 : 0;
 		$settings['admin_notify_enabled'] = ! empty( $input['admin_notify_enabled'] ) ? 1 : 0;
+
+		$recipients = isset( $input['admin_notify_recipients'] ) ? sanitize_key( $input['admin_notify_recipients'] ) : 'admin_email';
+		$settings['admin_notify_recipients'] = in_array( $recipients, array( 'admin_email', 'all_admins' ), true ) ? $recipients : 'admin_email';
 		$settings['magic_link_email_enabled'] = ! empty( $input['magic_link_email_enabled'] ) ? 1 : 0;
 		$settings['deny_email_enabled'] = ! empty( $input['deny_email_enabled'] ) ? 1 : 0;
 

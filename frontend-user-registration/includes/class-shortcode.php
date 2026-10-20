@@ -8,22 +8,39 @@ class FEUR_Shortcode {
 		add_shortcode( 'fe_login_form', array( $this, 'login_form_shortcode' ) );
 		add_shortcode( 'fe_registration_form', array( $this, 'registration_form_shortcode' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'assets' ) );
+		add_action( 'template_redirect', array( $this, 'nocache' ), 1 );
+	}
+
+	private function has_fe_form() {
+		if ( is_page( FEUR_Page_Installer::get_page_id() ) ) {
+			return true;
+		}
+		if ( is_singular() ) {
+			global $post;
+			if ( $post && ( has_shortcode( $post->post_content, 'fe_account_form' ) || has_shortcode( $post->post_content, 'fe_login_form' ) || has_shortcode( $post->post_content, 'fe_registration_form' ) ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public function nocache() {
+		if ( ! $this->has_fe_form() ) {
+			return;
+		}
+		if ( ! defined( 'DONOTCACHEPAGE' ) ) {
+			define( 'DONOTCACHEPAGE', true );
+		}
+		nocache_headers();
+		header( 'Cache-Control: no-store, no-cache, must-revalidate, max-age=0' );
+		header( 'Pragma: no-cache' );
 	}
 
 	public function assets() {
 		wp_register_style( 'feur', FEUR_URL . 'assets/css/registration.css', array(), FEUR_VERSION );
 		wp_register_script( 'feur-tabs', FEUR_URL . 'assets/js/account-tabs.js', array(), FEUR_VERSION, true );
 
-		$enqueue = false;
-		if ( is_page( FEUR_Page_Installer::get_page_id() ) ) {
-			$enqueue = true;
-		} elseif ( is_singular() ) {
-			global $post;
-			if ( $post && ( has_shortcode( $post->post_content, 'fe_account_form' ) || has_shortcode( $post->post_content, 'fe_login_form' ) || has_shortcode( $post->post_content, 'fe_registration_form' ) ) ) {
-				$enqueue = true;
-			}
-		}
-		if ( $enqueue ) {
+		if ( $this->has_fe_form() ) {
 			wp_enqueue_style( 'feur' );
 			wp_enqueue_script( 'feur-tabs' );
 		}
@@ -115,7 +132,6 @@ class FEUR_Shortcode {
 		$redirect = isset( $_GET['redirect_to'] ) ? esc_url_raw( wp_unslash( $_GET['redirect_to'] ) ) : '';
 		$html = '<form method="post" class="feur-form feur-login-form" action="' . esc_url( $this->form_action() ) . '">';
 		$html .= '<input type="hidden" name="feur_login" value="1">';
-		$html .= wp_nonce_field( 'feur_login', 'feur_nonce', true, false );
 		$html .= '<p><label for="feur_login_email">' . esc_html__( 'Email', 'feur' ) . '</label><br><input type="email" id="feur_login_email" name="email" class="feur-input" required></p>';
 		if ( $redirect ) {
 			$html .= '<input type="hidden" name="redirect_to" value="' . esc_attr( $redirect ) . '">';
@@ -132,8 +148,7 @@ class FEUR_Shortcode {
 
 		$html = '<form method="post" class="feur-form feur-register-form" action="' . esc_url( $this->form_action() ) . '">';
 		$html .= '<input type="hidden" name="feur_register" value="1">';
-		$html .= wp_nonce_field( 'feur_register', 'feur_nonce', true, false );
-		$html .= '<div style="position:absolute;left:-9999px;top:-9999px" aria-hidden="true"><input type="text" name="feur_honeypot" tabindex="-1" autocomplete="off" value=""></div>';
+		$html .= '<div style="position:absolute;left:-9999px;top:-9999px" aria-hidden="true"><input type="text" name="feur_honeypot" tabindex="-1" autocomplete="new-password" data-lpignore="true" value=""></div>';
 
 		$html .= '<p><label for="feur_reg_email">' . esc_html__( 'Email', 'feur' ) . ' <span class="feur-required">*</span></label><br>';
 		$html .= '<input type="email" id="feur_reg_email" name="email" class="feur-input" value="' . esc_attr( isset( $values['email'] ) ? $values['email'] : '' ) . '" required></p>';
