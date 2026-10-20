@@ -140,6 +140,11 @@ class CF7S_DB {
 			$values[] = $like;
 		}
 
+		if ( ! empty( $filter['after'] ) ) {
+			$where[] = 'created_at >= %s';
+			$values[] = $filter['after'];
+		}
+
 		return array( implode( ' AND ', $where ), $values );
 	}
 }

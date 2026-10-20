@@ -12,6 +12,66 @@ class CF7S_Admin {
 		add_action( 'admin_post_cf7s_delete', array( $this, 'handle_delete' ) );
 		add_action( 'admin_post_cf7s_bulk_delete', array( $this, 'handle_bulk_delete' ) );
 		add_action( 'admin_init', array( $this, 'handle_export' ) );
+		add_action( 'wpcf7_dashboard_setup', array( $this, 'dashboard_widget' ) );
+	}
+
+	public function dashboard_widget() {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return;
+		}
+
+		wp_add_dashboard_widget(
+			'cf7s_submissions_summary',
+			__( 'Submissions', 'cf7s' ),
+			array( $this, 'render_dashboard_widget' ),
+			null,
+			null,
+			'normal',
+			'high'
+		);
+	}
+
+	public function render_dashboard_widget() {
+		$total  = CF7S_DB::count();
+		$recent = CF7S_DB::count(
+			array(
+				'after' => gmdate( 'Y-m-d H:i:s', time() - 7 * DAY_IN_SECONDS ),
+			)
+		);
+		$latest = CF7S_DB::query( array( 'limit' => 1 ) );
+
+		echo '<ul>';
+
+		echo '<li>' . esc_html(
+			sprintf(
+				/* translators: %s: number of submissions */
+				_n( '%s submission', '%s submissions', $total, 'cf7s' ),
+				number_format_i18n( $total )
+			)
+		) . '</li>';
+
+		echo '<li>' . esc_html(
+			sprintf(
+				/* translators: %s: number of submissions in the last 7 days */
+				__( '%s in the last 7 days', 'cf7s' ),
+				number_format_i18n( $recent )
+			)
+		) . '</li>';
+
+		if ( $latest ) {
+			$row = $latest[0];
+			$when = get_date_from_gmt(
+				$row->created_at,
+				get_option( 'date_format' ) . ' ' . get_option( 'time_format' )
+			);
+			echo '<li>' . esc_html__( 'Latest:', 'cf7s' ) . ' <a href="' . esc_url( $this->detail_url( $row->id ) ) . '">' . esc_html( $row->form_title ) . '</a> &mdash; ' . esc_html( $when ) . '</li>';
+		} else {
+			echo '<li>' . esc_html__( 'No submissions yet.', 'cf7s' ) . '</li>';
+		}
+
+		echo '</ul>';
+
+		echo '<p><a class="button" href="' . esc_url( $this->list_url() ) . '">' . esc_html__( 'View all submissions', 'cf7s' ) . '</a></p>';
 	}
 
 	public function maybe_upgrade_db() {
@@ -19,8 +79,13 @@ class CF7S_Admin {
 	}
 
 	public function menu() {
+		// Contact Form 7 6.2 moved its top-level admin menu from "wpcf7" to "wpcf7-dashboard".
+		$parent = ( defined( 'WPCF7_VERSION' ) && version_compare( WPCF7_VERSION, '6.2', '>=' ) )
+			? 'wpcf7-dashboard'
+			: 'wpcf7';
+
 		add_submenu_page(
-			'wpcf7',
+			$parent,
 			__( 'Submissions', 'cf7s' ),
 			__( 'Submissions', 'cf7s' ),
 			'manage_options',
