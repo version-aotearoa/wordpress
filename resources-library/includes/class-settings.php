@@ -28,6 +28,7 @@ class RL_Settings {
 		);
 		add_settings_section( 'rl_settings_main', __( 'Library Settings', 'rl' ), '__return_false', 'rl-settings' );
 		add_settings_field( 'posts_per_page', __( 'Cards per page', 'rl' ), array( $this, 'field_posts_per_page' ), 'rl-settings', 'rl_settings_main' );
+		add_settings_field( 'default_sort', __( 'Default sort order', 'rl' ), array( $this, 'field_default_sort' ), 'rl-settings', 'rl_settings_main' );
 		add_settings_field( 'recent_tags_count', __( 'Recent tags count', 'rl' ), array( $this, 'field_recent_tags_count' ), 'rl-settings', 'rl_settings_main' );
 		add_settings_field( 'hide_top_arrows', __( 'Top-level section arrows', 'rl' ), array( $this, 'field_hide_top_arrows' ), 'rl-settings', 'rl_settings_main' );
 		add_settings_field( 'accent_color', __( 'Accent colour', 'rl' ), array( $this, 'field_accent_color' ), 'rl-settings', 'rl_settings_main' );
@@ -55,6 +56,16 @@ class RL_Settings {
 		$value = (int) RL_Plugin::get_setting( 'posts_per_page', 6 );
 		echo '<input type="number" min="1" step="1" name="' . esc_attr( RL_Plugin::SETTINGS_OPTION ) . '[posts_per_page]" value="' . esc_attr( $value ) . '" class="small-text"> ';
 		echo '<p class="description">' . esc_html__( 'How many resource cards load before "Load more" appears.', 'rl' ) . '</p>';
+	}
+
+	public function field_default_sort() {
+		$value = RL_Render::normalize_sort( RL_Plugin::get_setting( 'default_sort', 'title' ) );
+		echo '<select name="' . esc_attr( RL_Plugin::SETTINGS_OPTION ) . '[default_sort]">';
+		foreach ( RL_Plugin::sort_options() as $key => $label ) {
+			echo '<option value="' . esc_attr( $key ) . '"' . selected( $value, $key, false ) . '>' . esc_html( $label ) . '</option>';
+		}
+		echo '</select>';
+		echo '<p class="description">' . esc_html__( 'Order of resource cards in the library. Visitors can still change it from the "Sort by" menu above the grid.', 'rl' ) . '</p>';
 	}
 
 	public function field_recent_tags_count() {
@@ -131,6 +142,9 @@ class RL_Settings {
 
 		$rtc = isset( $input['recent_tags_count'] ) ? absint( $input['recent_tags_count'] ) : 10;
 		$settings['recent_tags_count'] = max( 1, min( 50, $rtc ) );
+
+		$sort = isset( $input['default_sort'] ) && is_string( $input['default_sort'] ) ? sanitize_key( $input['default_sort'] ) : '';
+		$settings['default_sort'] = array_key_exists( $sort, RL_Plugin::sort_options() ) ? $sort : 'title';
 
 		$accent = isset( $input['accent_color'] ) ? sanitize_text_field( $input['accent_color'] ) : '';
 		$settings['accent_color'] = self::sanitize_hex( $accent, '#2271b1' );

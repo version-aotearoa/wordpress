@@ -22,20 +22,22 @@ class RL_Ajax {
 		$paged = isset( $_GET['page'] ) ? absint( $_GET['page'] ) : 1;
 		$base = isset( $_GET['base'] ) ? esc_url_raw( wp_unslash( $_GET['base'] ) ) : '';
 		$favourites = ( '1' === ( isset( $_GET['favourites'] ) ? sanitize_key( wp_unslash( $_GET['favourites'] ) ) : '' ) );
+		$sort = RL_Render::normalize_sort( isset( $_GET['sort'] ) ? wp_unslash( $_GET['sort'] ) : '' );
 
 		if ( RL_Access::is_gated_view() ) {
 			wp_send_json_success(
 				array(
-					'html'         => RL_Access::login_panel( RL_Render::gated_redirect_url( $tag, $favourites, $base ) ),
+					'html'         => RL_Access::login_panel( RL_Render::gated_redirect_url( $tag, $favourites, $base, $format, $sort ) ),
 					'login'        => true,
 					'more'         => false,
 					'formats'      => array(),
 					'formats_html' => '',
+					'sort'         => $sort,
 				)
 			);
 		}
 
-		$query = RL_Render::query( $tag, $format, $paged, $favourites );
+		$query = RL_Render::query( $tag, $format, $paged, $favourites, $sort );
 
 		$formats = RL_Render::applicable_formats( $tag, $favourites );
 		$format_slugs = array();
@@ -50,7 +52,8 @@ class RL_Ajax {
 				'html'         => $cards ? $cards : RL_Render::empty_html( $favourites ),
 				'more'         => $query->max_num_pages > $paged,
 				'formats'      => $format_slugs,
-				'formats_html' => RL_Render::formats_html( $formats, $format, $tag, $base, $favourites ),
+				'formats_html' => RL_Render::formats_html( $formats, $format, $tag, $base, $favourites, false, $sort ),
+				'sort'         => $sort,
 			)
 		);
 	}
@@ -94,11 +97,13 @@ class RL_Ajax {
 	public function toggle_featured() {
 		$post_id = isset( $_GET['post_id'] ) ? absint( $_GET['post_id'] ) : 0;
 		check_ajax_referer( 'rl_toggle_featured_' . $post_id, 'nonce' );
-		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error();
-		}
 		$post = get_post( $post_id );
 		if ( ! $post || RL_Plugin::PT !== $post->post_type ) {
+			wp_send_json_error();
+		}
+		// Resources use the default post capabilities, so anyone who can edit
+		// this resource may feature it (matches class-meta.php).
+		if ( ! current_user_can( 'edit_post', $post_id ) ) {
 			wp_send_json_error();
 		}
 		$featured = ! (bool) get_post_meta( $post_id, RL_Plugin::FEATURED_META, true );

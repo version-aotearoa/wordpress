@@ -27,6 +27,7 @@ final class RL_Plugin {
 		'public_featured'   => 0,
 		'default_image'     => 0,
 		'hide_top_arrows'   => 0,
+		'default_sort'      => 'title',
 	);
 
 	private static $instance = null;
@@ -88,5 +89,13 @@ final class RL_Plugin {
 	public static function get_setting( $key, $default = '' ) {
 		$settings = self::get_settings();
 		return isset( $settings[ $key ] ) ? $settings[ $key ] : $default;
+	}
+
+	public static function sort_options() {
+		return array(
+			'newest'  => __( 'Newest first', 'rl' ),
+			'title'   => __( 'Title A–Z', 'rl' ),
+			'updated' => __( 'Recently updated', 'rl' ),
+		);
 	}
 }

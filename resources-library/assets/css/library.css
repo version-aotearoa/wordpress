@@ -172,10 +172,64 @@
 	margin: 0 0 .75rem;
 }
 
+.rl-head-tools {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: .75rem 1rem;
+}
+
 .rl-formats {
 	display: flex;
 	flex-wrap: wrap;
 	gap: .4rem;
+}
+
+.rl-sort {
+	display: flex;
+	align-items: center;
+	margin-left: auto;
+}
+
+.rl-sort-form {
+	display: flex;
+	align-items: center;
+	gap: .5rem;
+	margin: 0;
+}
+
+.rl-sort-label {
+	font-size: .875rem;
+	color: #50575e;
+	white-space: nowrap;
+}
+
+.rl-sort-select {
+	padding: .3rem 2rem .3rem .8rem;
+	border: 1px solid #c3c4c7;
+	border-radius: 999px;
+	background-color: #fff;
+	color: inherit;
+	font: inherit;
+	font-size: .875rem;
+	line-height: 1.4;
+	cursor: pointer;
+}
+
+.rl-sort-select:hover,
+.rl-sort-select:focus {
+	border-color: var(--rl-accent);
+	color: var(--rl-accent);
+}
+
+.rl-sort-apply {
+	padding: .3rem .8rem;
+	border: 1px solid var(--rl-accent);
+	border-radius: 999px;
+	background: var(--rl-accent-light);
+	color: var(--rl-accent);
+	cursor: pointer;
 }
 
 .rl-chip {

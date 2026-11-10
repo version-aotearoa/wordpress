@@ -133,9 +133,10 @@ class RL_Page_Template {
 			'load_more'  => __( 'Load more', 'rl' ),
 			'no_results' => __( 'No resources found.', 'rl' ),
 			'error'      => __( 'Something went wrong. Please reload the page.', 'rl' ),
-			'featured'   => __( 'Featured Resources', 'rl' ),
-			'favourites' => __( 'Favourites', 'rl' ),
-			'link_copied' => __( 'Link copied', 'rl' ),
+			'featured'     => __( 'Featured Resources', 'rl' ),
+			'favourites'   => __( 'Favourites', 'rl' ),
+			'link_copied'  => __( 'Link copied', 'rl' ),
+			'default_sort' => RL_Render::default_sort(),
 			)
 		);
 	}

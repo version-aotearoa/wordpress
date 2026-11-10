@@ -15,10 +15,19 @@ class RL_Reorder {
 			'edit.php?post_type=' . RL_Plugin::PT,
 			__( 'Reorder Sections', 'rl' ),
 			__( 'Reorder Sections', 'rl' ),
-			'manage_options',
+			$this->capability(),
 			'rl-reorder',
 			array( $this, 'render' )
 		);
+	}
+
+	/**
+	 * Reordering is part of managing resources, so it follows the post type's
+	 * own edit capability rather than site-administration rights.
+	 */
+	private function capability() {
+		$post_type = get_post_type_object( RL_Plugin::PT );
+		return ( $post_type && isset( $post_type->cap->edit_posts ) ) ? $post_type->cap->edit_posts : 'edit_posts';
 	}
 
 	public function admin_assets( $hook ) {
@@ -34,7 +43,7 @@ class RL_Reorder {
 	}
 
 	public function render() {
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! current_user_can( $this->capability() ) ) {
 			return;
 		}
 

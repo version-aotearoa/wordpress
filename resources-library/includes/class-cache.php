@@ -127,6 +127,17 @@ class RL_Cache {
 			$urls[] = $base . '/?format=' . $format_slug;
 		}
 
-		return $urls;
+		$default_sort = RL_Render::default_sort();
+		$sort_variants = array();
+		foreach ( array_keys( RL_Plugin::sort_options() ) as $sort_key ) {
+			if ( $sort_key === $default_sort ) {
+				continue;
+			}
+			foreach ( $urls as $url ) {
+				$sort_variants[] = $url . ( false === strpos( $url, '?' ) ? '?sort=' . $sort_key : '&sort=' . $sort_key );
+			}
+		}
+
+		return array_merge( $urls, $sort_variants );
 	}
 }

@@ -8,6 +8,7 @@ class RL_Render {
 		$format_slug = isset( $_GET['format'] ) ? sanitize_title( wp_unslash( $_GET['format'] ) ) : '';
 		$paged = isset( $_GET['page'] ) ? absint( $_GET['page'] ) : 1;
 		$favourites = ( '1' === ( isset( $_GET['favourites'] ) ? sanitize_key( wp_unslash( $_GET['favourites'] ) ) : '' ) );
+		$sort = self::normalize_sort( isset( $_GET['sort'] ) ? wp_unslash( $_GET['sort'] ) : '' );
 
 		if ( ! $base_url ) {
 			$base_url = get_permalink();
@@ -17,10 +18,10 @@ class RL_Render {
 
 		$formats = $gated ? array() : self::applicable_formats( $tag_slug, $favourites );
 
-		$query = $gated ? null : self::query( $tag_slug, $format_slug, $paged, $favourites );
+		$query = $gated ? null : self::query( $tag_slug, $format_slug, $paged, $favourites, $sort );
 
 		$html = '<div class="rl-library">';
-		$html .= self::sidebar_html( $tag_slug, $format_slug, $base_url, $favourites );
+		$html .= self::sidebar_html( $tag_slug, $format_slug, $base_url, $favourites, $sort );
 
 		$html .= '<main class="rl-main" id="rl-main">';
 		$html .= '<div class="rl-head">';
@@ -33,12 +34,15 @@ class RL_Render {
 			$title = __( 'Featured Resources', 'rl' );
 		}
 		$html .= '<h1 class="rl-title" data-title="' . esc_attr( get_the_title() ) . '">' . esc_html( $title ) . '</h1>';
-		$html .= self::formats_html( $formats, $format_slug, $tag_slug, $base_url, $favourites, $gated );
+		$html .= '<div class="rl-head-tools">';
+		$html .= self::formats_html( $formats, $format_slug, $tag_slug, $base_url, $favourites, $gated, $sort );
+		$html .= self::sort_html( $sort, $base_url, $tag_slug, $format_slug, $favourites, $gated );
+		$html .= '</div>';
 		$html .= '</div>';
 
 		$html .= '<div class="rl-posts" id="rl-posts" data-page="' . esc_attr( max( 1, $paged ) ) . '">';
 		if ( $gated ) {
-			$html .= RL_Access::login_panel( self::gated_redirect_url( $tag_slug, $favourites, $base_url ) );
+			$html .= RL_Access::login_panel( self::gated_redirect_url( $tag_slug, $favourites, $base_url, $format_slug, $sort ) );
 		} else {
 			$cards = self::cards( $query );
 			if ( $cards ) {
@@ -58,7 +62,7 @@ class RL_Render {
 		return $html;
 	}
 
-	public static function gated_redirect_url( $tag_slug = '', $favourites = false, $base_url = '' ) {
+	public static function gated_redirect_url( $tag_slug = '', $favourites = false, $base_url = '', $format_slug = '', $sort = '' ) {
 		if ( ! $base_url ) {
 			$base_url = get_permalink();
 		}
@@ -66,21 +70,95 @@ class RL_Render {
 		if ( $tag_slug ) {
 			$args['tag'] = $tag_slug;
 		}
+		if ( $format_slug ) {
+			$args['format'] = $format_slug;
+		}
 		if ( $favourites ) {
 			$args['favourites'] = '1';
 		}
-		return $args ? add_query_arg( $args, $base_url ) : $base_url;
+		$url = $args ? add_query_arg( $args, $base_url ) : $base_url;
+		return self::with_sort( $url, $sort );
 	}
 
-	public static function query( $tag = '', $format = '', $paged = 1, $favourites = false ) {
+	public static function default_sort() {
+		$options = RL_Plugin::sort_options();
+		$default = sanitize_key( (string) RL_Plugin::get_setting( 'default_sort', 'title' ) );
+		return isset( $options[ $default ] ) ? $default : 'title';
+	}
+
+	public static function normalize_sort( $sort = '' ) {
+		$options = RL_Plugin::sort_options();
+		$sort = is_string( $sort ) ? sanitize_key( $sort ) : '';
+		return isset( $options[ $sort ] ) ? $sort : self::default_sort();
+	}
+
+	private static function sort_order( $sort ) {
+		switch ( self::normalize_sort( $sort ) ) {
+			case 'newest':
+				return array(
+					'orderby' => 'date',
+					'order'   => 'DESC',
+				);
+			case 'updated':
+				return array(
+					'orderby' => 'modified',
+					'order'   => 'DESC',
+				);
+			default:
+				return array(
+					'orderby' => 'title',
+					'order'   => 'ASC',
+				);
+		}
+	}
+
+	private static function with_sort( $url, $sort ) {
+		$sort = self::normalize_sort( $sort );
+		if ( self::default_sort() === $sort ) {
+			return $url;
+		}
+		return add_query_arg( 'sort', $sort, $url );
+	}
+
+	public static function sort_html( $sort, $base_url = '', $tag_slug = '', $format_slug = '', $favourites = false, $hidden = false ) {
+		if ( ! $base_url ) {
+			$base_url = get_permalink();
+		}
+		$sort = self::normalize_sort( $sort );
+
+		$html = '<div class="rl-sort"' . ( $hidden ? ' style="display:none"' : '' ) . '>';
+		$html .= '<form class="rl-sort-form" method="get" action="' . esc_url( $base_url ) . '">';
+		if ( $tag_slug ) {
+			$html .= '<input type="hidden" name="tag" value="' . esc_attr( $tag_slug ) . '">';
+		}
+		if ( $format_slug ) {
+			$html .= '<input type="hidden" name="format" value="' . esc_attr( $format_slug ) . '">';
+		}
+		if ( $favourites ) {
+			$html .= '<input type="hidden" name="favourites" value="1">';
+		}
+		$html .= '<label class="rl-sort-label" for="rl-sort">' . esc_html__( 'Sort by', 'rl' ) . '</label>';
+		$html .= '<select id="rl-sort" name="sort" class="rl-sort-select">';
+		foreach ( RL_Plugin::sort_options() as $value => $label ) {
+			$html .= '<option value="' . esc_attr( $value ) . '"' . selected( $sort, $value, false ) . '>' . esc_html( $label ) . '</option>';
+		}
+		$html .= '</select>';
+		$html .= '<noscript><button type="submit" class="rl-sort-apply">' . esc_html__( 'Apply', 'rl' ) . '</button></noscript>';
+		$html .= '</form>';
+		$html .= '</div>';
+		return $html;
+	}
+
+	public static function query( $tag = '', $format = '', $paged = 1, $favourites = false, $sort = '' ) {
 		$per_page = (int) apply_filters( 'rl_posts_per_page', (int) RL_Plugin::get_setting( 'posts_per_page', 6 ) );
+		$order = self::sort_order( $sort );
 		$args = array(
 			'post_type'      => RL_Plugin::PT,
 			'post_status'    => 'publish',
 			'posts_per_page' => $per_page,
 			'paged'          => max( 1, (int) $paged ),
-			'orderby'        => 'date',
-			'order'          => 'DESC',
+			'orderby'        => $order['orderby'],
+			'order'          => $order['order'],
 		);
 
 		$tax_query = array();
@@ -119,7 +197,7 @@ class RL_Render {
 		return new WP_Query( $args );
 	}
 
-	public static function sidebar_html( $tag_slug = '', $format_slug = '', $base_url = '', $favourites = false ) {
+	public static function sidebar_html( $tag_slug = '', $format_slug = '', $base_url = '', $favourites = false, $sort = '' ) {
 		if ( ! $base_url ) {
 			$base_url = get_permalink();
 		}
@@ -134,10 +212,12 @@ class RL_Render {
 		$html = '<aside class="rl-sidebar rl-minimized" id="rl-sidebar">';
 		$html .= '<h2 class="rl-sidebar-title">' . esc_html__( 'Resource Library', 'rl' ) . '</h2>';
 		$feat_link = add_query_arg( array( 'tag' => false, 'format' => false, 'favourites' => false, 'page' => false ), $base_url );
+		$feat_link = self::with_sort( $feat_link, $sort );
 		$feat_class = 'rl-tag rl-featured-nav' . ( ( '' === $tag_slug && ! $favourites ) ? ' rl-tag-active' : '' );
 		$html .= '<a href="' . esc_url( $feat_link ) . '" class="' . esc_attr( $feat_class ) . '" data-featured-nav="1">' . esc_html__( 'Featured Resources', 'rl' ) . '</a>';
 		if ( is_user_logged_in() || RL_Access::featured_only() ) {
 			$fav_link = add_query_arg( array( 'favourites' => 1, 'tag' => false, 'format' => false, 'page' => false ), $base_url );
+			$fav_link = self::with_sort( $fav_link, $sort );
 			$fav_class = 'rl-tag rl-fav-nav' . ( $favourites ? ' rl-tag-active' : '' );
 			$html .= '<a href="' . esc_url( $fav_link ) . '" class="' . esc_attr( $fav_class ) . '" data-fav-nav="1">' . esc_html__( 'Favourites', 'rl' ) . '</a>';
 		}
@@ -153,7 +233,7 @@ class RL_Render {
 			$hide_top_arrows = (bool) RL_Plugin::get_setting( 'hide_top_arrows', 0 );
 			$html .= '<h3 class="rl-sidebar-sections"><button type="button" class="rl-sidebar-toggle" aria-expanded="true" aria-controls="rl-tag-nav">' . esc_html__( 'Sections', 'rl' ) . '</button></h3>';
 			$html .= '<nav class="rl-tag-nav" id="rl-tag-nav" aria-label="' . esc_attr__( 'Resource sections', 'rl' ) . '">';
-			$html .= self::tag_list_html( $by_parent, 0, '', $tag_slug, $format_slug, $base_url, 0, true, $open_slugs, $hide_top_arrows );
+			$html .= self::tag_list_html( $by_parent, 0, '', $tag_slug, $format_slug, $base_url, 0, true, $open_slugs, $hide_top_arrows, $sort );
 			$html .= '</nav>';
 		} else {
 			$html .= '<p>' . esc_html__( 'No sections yet.', 'rl' ) . '</p>';
@@ -209,7 +289,7 @@ class RL_Render {
 		return $slugs;
 	}
 
-	private static function tag_list_html( $by_parent, $parent_id, $parent_slug, $tag_slug, $format_slug, $base_url, $depth = 0, $parent_visible = true, $open_slugs = array(), $hide_top_arrows = false ) {
+	private static function tag_list_html( $by_parent, $parent_id, $parent_slug, $tag_slug, $format_slug, $base_url, $depth = 0, $parent_visible = true, $open_slugs = array(), $hide_top_arrows = false, $sort = '' ) {
 		$html = '';
 		if ( empty( $by_parent[ $parent_id ] ) ) {
 			return $html;
@@ -218,6 +298,7 @@ class RL_Render {
 			$has_children = ! empty( $by_parent[ (int) $tag->term_id ] );
 			$link = add_query_arg( array( 'tag' => $tag->slug, 'page' => false ), $base_url );
 			$link = $format_slug ? add_query_arg( 'format', $format_slug, $link ) : remove_query_arg( 'format', $link );
+			$link = self::with_sort( $link, $sort );
 			$class = 'rl-tag' . ( $tag->slug === $tag_slug ? ' rl-tag-active' : '' );
 			$data_parent = '';
 			if ( $depth > 0 ) {
@@ -250,7 +331,7 @@ class RL_Render {
 				$html .= '<button type="button" class="rl-tag-arrow' . ( $is_open ? ' is-open' : '' ) . '" data-arrow="' . esc_attr( $tag->slug ) . '" aria-expanded="' . ( $is_open ? 'true' : 'false' ) . '" aria-label="' . esc_attr( sprintf( __( 'Toggle children of %s', 'rl' ), $tag->name ) ) . '"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M9 5l7 7-7 7V5z"/></svg></button>';
 			}
 			$html .= '</div>';
-			$html .= self::tag_list_html( $by_parent, (int) $tag->term_id, $tag->slug, $tag_slug, $format_slug, $base_url, $depth + 1, $row_visible, $open_slugs, $hide_top_arrows );
+			$html .= self::tag_list_html( $by_parent, (int) $tag->term_id, $tag->slug, $tag_slug, $format_slug, $base_url, $depth + 1, $row_visible, $open_slugs, $hide_top_arrows, $sort );
 		}
 		return $html;
 	}
@@ -327,7 +408,7 @@ class RL_Render {
 		return $applicable;
 	}
 
-	public static function formats_html( $formats, $format_slug, $tag_slug, $base_url, $favourites = false, $hidden = false ) {
+	public static function formats_html( $formats, $format_slug, $tag_slug, $base_url, $favourites = false, $hidden = false, $sort = '' ) {
 		$html = '<div class="rl-formats" id="rl-formats" role="group" aria-label="' . esc_attr__( 'Filter by format', 'rl' ) . '"' . ( $hidden ? ' style="display:none"' : '' ) . '>';
 		$all_link = add_query_arg( array( 'format' => false, 'page' => false ), $base_url );
 		if ( $favourites ) {
@@ -336,6 +417,7 @@ class RL_Render {
 		if ( $tag_slug ) {
 			$all_link = add_query_arg( 'tag', $tag_slug, $all_link );
 		}
+		$all_link = self::with_sort( $all_link, $sort );
 		$html .= '<a href="' . esc_url( $all_link ) . '" class="rl-chip' . ( $format_slug ? '' : ' rl-chip-active' ) . '" data-format="">' . esc_html__( 'All', 'rl' ) . '</a>';
 		foreach ( $formats as $format ) {
 			$link = add_query_arg( array( 'format' => $format->slug, 'page' => false ), $base_url );
@@ -345,6 +427,7 @@ class RL_Render {
 			if ( $tag_slug ) {
 				$link = add_query_arg( 'tag', $tag_slug, $link );
 			}
+			$link = self::with_sort( $link, $sort );
 			$html .= '<a href="' . esc_url( $link ) . '" class="rl-chip' . ( $format->slug === $format_slug ? ' rl-chip-active' : '' ) . '" data-format="' . esc_attr( $format->slug ) . '">' . esc_html( $format->name ) . '</a>';
 		}
 		$html .= '</div>';

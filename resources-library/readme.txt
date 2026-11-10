@@ -4,7 +4,7 @@ Tags: resources, custom post type, ajax, library
 Requires at least: 5.8
 Tested up to: 6.6
 Requires PHP: 7.4
-Stable tag: 1.1.43
+Stable tag: 1.1.45
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -20,6 +20,7 @@ Adds a public "Resources" custom post type (slug `resource`) with two taxonomies
 The plugin provides a "Resource Library" page template (selectable in the Page Attributes dropdown). The template renders a left sidebar listing all resource tags and a main area with:
 
 * Format filter chips (All | Video | Link | Article).
+* A "Sort by" menu (Newest first | Title A–Z | Recently updated) above the grid; the default order is set in Resources -> Settings.
 * A posts grid that loads by tag via AJAX, without reloading the page.
 * "Load more" pagination.
 
@@ -59,6 +60,15 @@ If the Frontend User Registration plugin is active, enable "Resources" under Mem
 Yes. Enable "Public Featured Resources" in Resources -> Settings. Logged-out visitors can then view the Featured Resources grid and open featured resources. The sections list stays visible; clicking a section (or opening a non-featured resource) loads an in-page login form in the content area instead of redirecting. Requires the Frontend User Registration plugin.
 
 == Changelog ==
+
+= 1.1.45 =
+* The featured toggle and "Reorder Sections" now check edit rights for the resource rather than site-administration rights, so Members Managers and other content editors can feature and reorder resources.
+
+= 1.1.44 =
+* New "Sort by" menu above the resource grid with Newest first, Title A–Z and Recently updated. The chosen order is kept in the URL and when loading more cards, and is preserved when selecting sections, formats or Favourites.
+* New "Default sort order" setting (Resources -> Settings) controls the order the library starts with. Existing sites default to Title A–Z.
+* The library cache purge now also clears the non-default sort views, so a bookmarked sorted view is never stale.
+* Sort controls are hidden for the in-page members login prompt and keep working without JavaScript (Apply button).
 
 = 1.1.43 =
 * Mobile: selecting a leaf section, Favourites or Featured Resources collapses the section menu and scrolls the results to the top. Selecting a section that reveals child sections keeps the menu open and leaves the scroll position alone.
