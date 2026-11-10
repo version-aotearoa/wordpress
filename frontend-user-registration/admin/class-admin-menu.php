@@ -60,6 +60,7 @@ class FEUR_Admin_Menu {
 		);
 
 		add_settings_section( 'feur_general', __( 'General', 'feur' ), '__return_false', 'feur-settings' );
+		add_settings_field( 'account_page', __( 'Account page', 'feur' ), array( $this, 'field_account_page' ), 'feur-settings', 'feur_general' );
 		add_settings_field( 'require_approval', __( 'Approval', 'feur' ), array( $this, 'field_require_approval' ), 'feur-settings', 'feur_general' );
 		add_settings_field( 'default_role', __( 'Default role', 'feur' ), array( $this, 'field_default_role' ), 'feur-settings', 'feur_general' );
 		add_settings_field( 'magic_link_expiry', __( 'Magic link expiry', 'feur' ), array( $this, 'field_magic_link_expiry' ), 'feur-settings', 'feur_general' );
@@ -67,6 +68,8 @@ class FEUR_Admin_Menu {
 		add_settings_field( 'terms_text', __( 'Terms text', 'feur' ), array( $this, 'field_terms_text' ), 'feur-settings', 'feur_general' );
 
 		add_settings_section( 'feur_emails', __( 'Emails', 'feur' ), '__return_false', 'feur-settings' );
+		add_settings_field( 'from_name', __( 'From name', 'feur' ), array( $this, 'field_from_name' ), 'feur-settings', 'feur_emails' );
+		add_settings_field( 'from_email', __( 'From email', 'feur' ), array( $this, 'field_from_email' ), 'feur-settings', 'feur_emails' );
 		add_settings_field( 'pending_email_enabled', __( 'Pending notice', 'feur' ), array( $this, 'field_pending_email_enabled' ), 'feur-settings', 'feur_emails' );
 		add_settings_field( 'admin_notify_enabled', __( 'Admin notification', 'feur' ), array( $this, 'field_admin_notify_enabled' ), 'feur-settings', 'feur_emails' );
 		add_settings_field( 'admin_notify_recipients', __( 'Notify who', 'feur' ), array( $this, 'field_admin_notify_recipients' ), 'feur-settings', 'feur_emails' );
@@ -80,6 +83,24 @@ class FEUR_Admin_Menu {
 
 	public function access_section_text() {
 		echo '<p>' . esc_html__( 'Restrict entire post types to logged-in Members.', 'feur' ) . '</p>';
+	}
+
+	/**
+	 * Read-only: surfaces the account page the plugin is actually using. A lost
+	 * option used to fail silently, breaking menus and profile links.
+	 */
+	public function field_account_page() {
+		$id  = FEUR_Page_Installer::get_page_id();
+		$url = FEUR_Page_Installer::account_url();
+
+		echo '<code>' . esc_html( $url ) . '</code>';
+
+		if ( $id && get_post( $id ) ) {
+			echo '<p class="description">' . esc_html__( 'Members log in and manage their profile here.', 'feur' ) . '</p>';
+			return;
+		}
+
+		echo '<p class="description" style="color:#b32d2e">' . esc_html__( 'No account page is stored, so this URL is assumed from the default /account/ slug. Re-activate the plugin to create the page, or check that it still exists.', 'feur' ) . '</p>';
 	}
 
 	public function field_require_approval() {
@@ -121,6 +142,18 @@ class FEUR_Admin_Menu {
 		$value = FEUR_Plugin::get_setting( 'terms_text', '' );
 		echo '<textarea name="feur_settings[terms_text]" rows="2" class="large-text">' . esc_textarea( $value ) . '</textarea>';
 		echo '<p class="description">' . esc_html__( 'Shown next to a required terms checkbox. Leave empty to disable.', 'feur' ) . '</p>';
+	}
+
+	public function field_from_name() {
+		$value = FEUR_Plugin::get_setting( 'from_name', '' );
+		echo '<input type="text" name="feur_settings[from_name]" value="' . esc_attr( $value ) . '" class="regular-text" placeholder="' . esc_attr__( 'NZAHTA', 'feur' ) . '"> ';
+		echo '<p class="description">' . esc_html__( 'Display name on Frontend User Registration emails.', 'feur' ) . '</p>';
+	}
+
+	public function field_from_email() {
+		$value = FEUR_Plugin::get_setting( 'from_email', '' );
+		echo '<input type="email" name="feur_settings[from_email]" value="' . esc_attr( $value ) . '" class="regular-text" placeholder="' . esc_attr__( 'noreply@example.com', 'feur' ) . '"> ';
+		echo '<p class="description">' . esc_html__( 'Sender address for Frontend User Registration emails only. The domain must be authorised by your mail provider or these emails will be filtered as spam. Leave blank to use the WordPress default.', 'feur' ) . '</p>';
 	}
 
 	public function field_pending_email_enabled() {
@@ -212,6 +245,21 @@ class FEUR_Admin_Menu {
 
 		$settings['pending_email_enabled'] = ! empty( $input['pending_email_enabled'] ) ? 1 : 0;
 		$settings['admin_notify_enabled'] = ! empty( $input['admin_notify_enabled'] ) ? 1 : 0;
+
+		$settings['from_name'] = isset( $input['from_name'] ) ? sanitize_text_field( $input['from_name'] ) : '';
+
+		$from_email = isset( $input['from_email'] ) ? trim( (string) $input['from_email'] ) : '';
+		if ( '' === $from_email ) {
+			// Explicitly cleared: fall back to the WordPress default sender.
+			$settings['from_email'] = '';
+		} else {
+			$from_email = sanitize_email( $from_email );
+			// An invalid address keeps the previous value rather than silently
+			// breaking login emails.
+			if ( $from_email && is_email( $from_email ) ) {
+				$settings['from_email'] = $from_email;
+			}
+		}
 
 		$recipients = isset( $input['admin_notify_recipients'] ) ? sanitize_key( $input['admin_notify_recipients'] ) : 'admin_email';
 		$settings['admin_notify_recipients'] = in_array( $recipients, array( 'admin_email', 'all_admins' ), true ) ? $recipients : 'admin_email';

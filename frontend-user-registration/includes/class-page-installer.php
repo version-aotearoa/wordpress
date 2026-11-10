@@ -54,6 +54,23 @@ class FEUR_Page_Installer {
 		return home_url( '/' );
 	}
 
+	/**
+	 * The account page URL, assuming the default /account/ slug when no page is
+	 * stored. Used where linking to the homepage would be wrong (menus, the
+	 * profile editor), so a lost option degrades to the expected path instead of
+	 * dropping visitors on the front page.
+	 */
+	public static function account_url() {
+		$id = self::get_page_id();
+		if ( $id ) {
+			$url = get_permalink( $id );
+			if ( $url ) {
+				return $url;
+			}
+		}
+		return home_url( '/account/' );
+	}
+
 	public static function delete_page() {
 		$id = self::get_page_id();
 		if ( $id && get_post( $id ) ) {

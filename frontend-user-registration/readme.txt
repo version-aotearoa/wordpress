@@ -4,7 +4,7 @@ Tags: registration, members, magic login, user fields
 Requires at least: 5.8
 Tested up to: 6.6
 Requires PHP: 7.4
-Stable tag: 1.1.9
+Stable tag: 1.1.22
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -18,6 +18,7 @@ Provides a front-end registration experience with:
 * Custom registration fields (text, email, textarea, select, radio, checkbox) managed from a field builder under Members -> Registration.
 * New registrations are assigned the Member role and can require admin approval before they are allowed to log in.
 * Single-use, expiring magic login links emailed to members on approval or on request.
+* Members edit their own name and profile fields on the account page; no wp-admin access needed.
 * Custom fields are editable on the profile screens, shown as columns on the Users list, and editable from the Members page.
 * Members-only access control: restrict entire post types to logged-in Members.
 
@@ -47,15 +48,68 @@ Two emails can be sent when someone registers:
 
 Both can be turned on or off under Members -> Registration -> Settings -> Emails. After an administrator approves the account, the member is emailed their single-use login link (the "Magic link email" setting).
 
+The same screen sets the "From name" and "From email" used by all of these emails, defaulting to "NZAHTA <noreply@nzahta.org.nz>". Only this plugin's mail uses them; the address domain must be authorised by your mail provider (Mailgun, SMTP relay) or the messages will be treated as spam.
+
 = How do I delegate member management? =
 
-Promote a member to Members Manager using "Promote to Manager" on the Members page. Members Managers can approve, deny, and set members pending; edit member names and custom fields; manage registration fields and settings; and view Members-only content. They cannot manage plugins, themes, or other site settings, cannot change a member's role, and cannot change the default registration role (administrators only). Only administrators can demote a Members Manager, and nobody can demote themselves.
+Promote a member to Members Manager using "Promote to Manager" on the Members page. Members Managers can approve, deny, and set members pending; edit member names and custom fields; manage registration fields and settings; view Members-only content; and create, edit, publish and delete posts, pages and Resources, including categories and tags and the resource featured/reorder controls. They cannot manage plugins, themes, or other site settings, cannot change a member's role, and cannot change the default registration role (administrators only). Only administrators can demote a Members Manager, and nobody can demote themselves.
 
 = Can I restrict content to members? =
 
 Yes. Under Members -> Registration -> Settings, enable the "Members only" toggle for any public post type. Non-members are redirected to the account page.
 
 == Changelog ==
+
+= 1.1.22 =
+* "Edit your profile" on the account page is a plain link again. The button styling added for it has been removed, restoring the original appearance of the form buttons.
+
+= 1.1.21 =
+* Members Managers no longer see the Contact Form 7 admin menu, and direct access to any wpcf7 admin page is blocked. They keep the Submissions screen, which the submissions plugin now registers as a top-level menu for non-administrators.
+
+= 1.1.20 =
+* Menu labels used to detect the Login and Join items are now filterable (`feur_nav_login_labels`, `feur_nav_join_labels`), so site-specific wording such as "Join NZAHTA" or "Members Area" can be matched without a code change. Matching is case-insensitive and substring-based, and both items still have to point at the account page.
+
+= 1.1.19 =
+* Classic menus now get the same treatment as block navigation for logged-in visitors: the Login item is removed and the Join item becomes "My Account" pointing at the account page.
+* The account URL falls back to the default /account/ path when the stored page is missing, instead of silently using the homepage. Members -> Registration -> Settings now shows which URL is in use and warns when it is assumed.
+* Admin bar: every profile link is redirected to the front-end editor in place, and duplicate "Edit profile" entries are removed. Visiting wp-admin/profile.php now opens the front-end editor rather than the dashboard.
+* Members Managers can no longer reach the UX Blocks (`blocks`) admin screens, in addition to featured items. The list of hidden post types is filterable via `feur_manager_hidden_post_types`.
+* Members Managers receive the `cf7s_view_submissions` capability used by the Contact Form 7 Submissions plugin.
+
+= 1.1.18 =
+* Block navigation now adapts for logged-in visitors: the "Join" registration button becomes "My Account" and links to the account page without the registration query string, and the "Login" link is removed. Logged-out menus are unchanged. Wording is filterable via `feur_nav_account_label`.
+
+= 1.1.17 =
+* Members Managers now get the separate page capabilities, so the Pages admin menu appears and pages can be created, published and edited.
+* The wp-admin Profile screen is hidden and blocked for Members Managers, and the admin bar now points "Howdy" and "Edit profile" at the front-end profile editor instead of the blocked screen. Administrators are unaffected.
+* "Edit your profile" on the account page is now a button.
+
+= 1.1.16 =
+* New front-end profile editor on the account page: members edit their first and last name plus any fields marked "editable in profile", without visiting wp-admin. The login email is shown read-only and the password is not editable, since login is by magic link.
+* Members Managers no longer see the Comments, Tools or featured item (portfolio) admin menus, and direct access to those screens is blocked. Administrators, including users who also hold the Members Manager role, are unaffected.
+
+= 1.1.15 =
+* The "login link sent" and "awaiting approval" messages now prompt members to check their spam or junk folder if the email does not arrive, since mail can be delayed or filtered before the sending domain passes DKIM/DMARC checks.
+
+= 1.1.14 =
+* Logging out now returns to the account page and shows "You have been logged out." This covers the account page link, the admin bar and wp-admin, which previously fell through to the WordPress login form.
+* A logout link that requests its own destination is still honoured.
+
+= 1.1.13 =
+* New "From name" and "From email" settings under Emails, applied to Frontend User Registration emails only. Defaults to "NZAHTA <noreply@nzahta.org.nz>". Leave the address blank to fall back to the WordPress default sender; an invalid address is rejected so login email cannot break silently.
+* The sender is applied at filter priority 99, so an SMTP plugin's "force from" setting does not override it for these emails.
+
+= 1.1.12 =
+* Members Managers can now manage content as well as members: they receive the default post capabilities (create, edit, publish and delete posts and pages, upload files) and can manage categories and tags.
+* Registration notification emails link to the account page, which now shows shortcuts for administrators and Members Managers: the number of members awaiting approval with a link to the Members screen, plus "Add resource" and "Manage resources" links when the Resources Library post type is present.
+
+= 1.1.11 =
+* Registration notification emails now link to the account page instead of Members -> All Members, so recipients who are logged out sign in normally rather than landing on the WordPress login form.
+* Added a review shortcut to the logged-in account page for administrators and Members Managers: the number of members awaiting approval with a link to the Members screen.
+* Logged-out visitors bounced out of wp-admin (a redirect_to pointing at wp-admin) are now sent to the account page login tab instead of the stock WordPress login form. Bare wp-login.php requests, password resets, logout, and reauthentication prompts are unaffected.
+
+= 1.1.10 =
+* Fix: the member role now displays as "Member" (singular) on the Users screen and role dropdown when an older install had stored the plural label "Members".
 
 = 1.1.9 =
 * New Members Manager role for delegated member management: approve, deny, and set pending; edit member names and custom fields; manage registration fields and settings; and view Members-only content - without full administrator access.

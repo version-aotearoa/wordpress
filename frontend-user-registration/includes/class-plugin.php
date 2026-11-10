@@ -12,6 +12,8 @@ final class FEUR_Plugin {
 		'login_redirect'           => '',
 		'terms_text'               => '',
 		'pending_email_enabled'    => 1,
+		'from_name'                => 'NZAHTA',
+		'from_email'               => 'noreply@nzahta.org.nz',
 		'admin_notify_enabled'     => 1,
 		'admin_notify_recipients'  => 'admin_email',
 		'magic_link_email_enabled' => 1,
@@ -29,10 +31,13 @@ final class FEUR_Plugin {
 		new FEUR_Registration_Handler();
 		new FEUR_Login_Handler();
 		new FEUR_Approval();
+		new FEUR_Profile_Editor();
 		new FEUR_Shortcode();
 		new FEUR_User_Profile();
 		new FEUR_Users_List();
 		new FEUR_User_Admin_Page();
+		new FEUR_Manager_Admin();
+		new FEUR_Nav_Menu();
 		new FEUR_Member_Access();
 		new FEUR_Admin_Menu( new FEUR_Field_Builder() );
 	}

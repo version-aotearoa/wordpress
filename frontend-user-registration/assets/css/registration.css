@@ -2,6 +2,31 @@
 	max-width: 640px;
 }
 
+.feur-review {
+	margin: 0 0 1em;
+	padding: .8em 1em;
+	background: #f6f7f7;
+	border-left: 4px solid #2271b1;
+}
+
+.feur-review p {
+	margin: 0;
+}
+
+.feur-review p + p {
+	margin-top: .4em;
+}
+
+.feur-profile-form {
+	margin: 1em 0 0;
+	padding-top: 1em;
+	border-top: 1px solid #ddd;
+}
+
+.feur-profile-email small {
+	color: #646970;
+}
+
 .feur-tabs {
 	margin: 0 0 1.2em;
 	border-bottom: 1px solid #ddd;

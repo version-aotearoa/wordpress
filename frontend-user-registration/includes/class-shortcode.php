@@ -94,6 +94,7 @@ class FEUR_Shortcode {
 		$user = wp_get_current_user();
 		$html = '<div class="feur-account feur-logged-in">';
 		$html .= '<h2>' . esc_html__( 'You are logged in', 'feur' ) . '</h2>';
+		$html .= $this->messages( array( 'errors' => array() ) );
 		$html .= '<p>' . sprintf( esc_html__( 'Welcome, %s.', 'feur' ), esc_html( $user->display_name ) ) . '</p>';
 
 		if ( FEUR_Role::is_member( $user ) ) {
@@ -123,9 +124,70 @@ class FEUR_Shortcode {
 			}
 		}
 
-		$html .= '<p><a href="' . esc_url( admin_url( 'profile.php' ) ) . '">' . esc_html__( 'Edit your profile', 'feur' ) . '</a> &middot; <a href="' . esc_url( wp_logout_url( get_permalink() ) ) . '">' . esc_html__( 'Log out', 'feur' ) . '</a></p>';
+		$html .= $this->review_panel();
+		$html .= FEUR_Profile_Editor::is_open() ? FEUR_Profile_Editor::form( $user ) . $this->account_links( true ) : $this->account_links( false );
 		$html .= '</div>';
 		return $html;
+	}
+
+	private function account_links( $editing ) {
+		$logout = '<a href="' . esc_url( wp_logout_url( FEUR_Page_Installer::get_url() ) ) . '">' . esc_html__( 'Log out', 'feur' ) . '</a>';
+
+		if ( $editing ) {
+			return '<p class="feur-profile-links"><a href="' . esc_url( FEUR_Page_Installer::get_url() ) . '">' . esc_html__( 'Cancel', 'feur' ) . '</a> &middot; ' . $logout . '</p>';
+		}
+
+		$edit = '<a href="' . esc_url( FEUR_Profile_Editor::url() ) . '">' . esc_html__( 'Edit your profile', 'feur' ) . '</a>';
+		return '<p class="feur-profile-links">' . $edit . ' &middot; ' . $logout . '</p>';
+	}
+
+	/**
+	 * Shortcuts for administrators and Members Managers. Registration
+	 * notification emails point at this page, so the destination for "someone
+	 * needs approving" has to be reachable from here. Resource shortcuts are
+	 * only rendered while the Resources Library post type is present.
+	 */
+	private function review_panel() {
+		$items = array();
+
+		if ( current_user_can( FEUR_Role::MANAGE ) ) {
+			$url     = admin_url( 'admin.php?page=feur-members' );
+			$pending = FEUR_Approval::pending_count();
+
+			if ( $pending > 0 ) {
+				$label = sprintf(
+					/* translators: %s: number of members awaiting approval. */
+					_n( '%s member awaiting approval', '%s members awaiting approval', $pending, 'feur' ),
+					number_format_i18n( $pending )
+				);
+				$items[] = '<p><a href="' . esc_url( $url ) . '"><strong>' . esc_html( $label ) . ' &rarr; ' . esc_html__( 'Review', 'feur' ) . '</strong></a></p>';
+			} else {
+				$items[] = '<p><a href="' . esc_url( $url ) . '">' . esc_html__( 'Manage members', 'feur' ) . '</a></p>';
+			}
+		}
+
+		$resources = $this->resource_links();
+		if ( '' !== $resources ) {
+			$items[] = $resources;
+		}
+
+		if ( empty( $items ) ) {
+			return '';
+		}
+
+		return '<div class="feur-review">' . implode( '', $items ) . '</div>';
+	}
+
+	/**
+	 * Shortcut to the Resources screens. The Resources Library post type uses
+	 * the default post capabilities, so edit_posts is the gate.
+	 */
+	private function resource_links() {
+		if ( ! post_type_exists( 'resource' ) || ! current_user_can( 'edit_posts' ) ) {
+			return '';
+		}
+
+		return '<p><a href="' . esc_url( admin_url( 'post-new.php?post_type=resource' ) ) . '">' . esc_html__( 'Add resource', 'feur' ) . '</a> &middot; <a href="' . esc_url( admin_url( 'edit.php?post_type=resource' ) ) . '">' . esc_html__( 'Manage resources', 'feur' ) . '</a></p>';
 	}
 
 	private function login_form() {
@@ -199,22 +261,34 @@ class FEUR_Shortcode {
 		}
 		$status = sanitize_key( wp_unslash( $_GET['fe_status'] ) );
 		$messages = array(
-			'pending'        => __( 'Your account has been created and is awaiting approval. You will receive an email with a login link once an administrator approves your membership.', 'feur' ),
+			'pending'        => __( 'Your account has been created and is awaiting approval. You will receive an email with a login link once an administrator approves your membership.', 'feur' ) . ' ' . $this->spam_hint(),
 			'success'        => __( 'Your account has been created. You can now log in.', 'feur' ),
-			'link_sent'      => __( 'If an account exists for that email address, a login link has been sent.', 'feur' ),
+			'link_sent'      => __( 'If an account exists for that email address, a login link has been sent.', 'feur' ) . ' ' . $this->spam_hint(),
 			'pending_login'  => __( 'That account is still pending approval. Please wait for an administrator to approve it.', 'feur' ),
 			'denied'         => __( 'Your membership application was declined. Please contact an administrator for assistance.', 'feur' ),
 			'invalid_link'   => __( 'That login link is invalid or has expired. Request a new one below.', 'feur' ),
 			'invalid_email'  => __( 'Please enter a valid email address.', 'feur' ),
 			'invalid_token'  => __( 'Invalid security token. Please try again.', 'feur' ),
 			'members_only'   => __( 'This content is for members only. Please log in to continue.', 'feur' ),
+			'logged_out'     => __( 'You have been logged out.', 'feur' ),
+			'profile_saved'  => __( 'Your profile has been updated.', 'feur' ),
+			'profile_error'  => __( 'Your profile could not be updated. Please try again.', 'feur' ),
 		);
-		$error_statuses = array( 'invalid_link', 'invalid_email', 'invalid_token' );
+		$error_statuses = array( 'invalid_link', 'invalid_email', 'invalid_token', 'profile_error' );
 		if ( isset( $messages[ $status ] ) ) {
 			$class = in_array( $status, $error_statuses, true ) ? 'feur-error' : 'feur-success';
 			$html .= '<div class="feur-notice ' . esc_attr( $class ) . '">' . esc_html( $messages[ $status ] ) . '</div>';
 		}
 		return $html;
+	}
+
+	/**
+	 * Reminder for the messages that promise an email: senders are not always in
+	 * the recipient's inbox yet, particularly before the From domain passes
+	 * DKIM/DMARC checks.
+	 */
+	private function spam_hint() {
+		return __( 'If it has not arrived after a few minutes, check your spam or junk folder.', 'feur' );
 	}
 
 	private function get_state() {

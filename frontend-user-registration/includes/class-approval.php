@@ -3,10 +3,37 @@ defined( 'ABSPATH' ) || exit;
 
 class FEUR_Approval {
 
+	/** True only while a Frontend User Registration email is being sent. */
+	private static $sending = false;
+
 	public function __construct() {
 		add_action( 'admin_post_feur_approve', array( $this, 'approve' ) );
 		add_action( 'admin_post_feur_deny', array( $this, 'deny' ) );
 		add_action( 'admin_post_feur_pending', array( $this, 'pending' ) );
+		// Priority 99 so an SMTP plugin's "force from" (usually 10) does not
+		// override the sender for these emails.
+		add_filter( 'wp_mail_from', array( __CLASS__, 'filter_from_email' ), 99 );
+		add_filter( 'wp_mail_from_name', array( __CLASS__, 'filter_from_name' ), 99 );
+	}
+
+	/**
+	 * Sender address for Frontend User Registration emails only. Other plugins
+	 * keep the site default because $sending is false for their mail.
+	 */
+	public static function filter_from_email( $email ) {
+		if ( ! self::$sending ) {
+			return $email;
+		}
+		$from = FEUR_Plugin::get_setting( 'from_email', '' );
+		return ( $from && is_email( $from ) ) ? $from : $email;
+	}
+
+	public static function filter_from_name( $name ) {
+		if ( ! self::$sending ) {
+			return $name;
+		}
+		$from_name = trim( (string) FEUR_Plugin::get_setting( 'from_name', '' ) );
+		return '' !== $from_name ? $from_name : $name;
 	}
 
 	public function approve() {
@@ -56,6 +83,23 @@ class FEUR_Approval {
 		$back = wp_get_referer() ? wp_get_referer() : admin_url( 'admin.php?page=feur-members' );
 		wp_safe_redirect( add_query_arg( 'feur_pending', '1', $back ) );
 		exit;
+	}
+
+	/**
+	 * Number of accounts waiting for approval. Cheap enough for the account
+	 * page because it is only called for users who can act on the result.
+	 */
+	public static function pending_count() {
+		$query = new WP_User_Query(
+			array(
+				'meta_key'    => 'fe_pending',
+				'meta_value'  => 1,
+				'fields'      => 'ID',
+				'number'      => 1,
+				'count_total' => true,
+			)
+		);
+		return (int) $query->get_total();
 	}
 
 	public static function status( $user_id ) {
@@ -117,7 +161,10 @@ class FEUR_Approval {
 			}
 			$body .= '</table>';
 			if ( $pending ) {
-				$body .= '<p><a href="' . esc_url( admin_url( 'admin.php?page=feur-members' ) ) . '">' . esc_html__( 'Review pending members', 'feur' ) . '</a></p>';
+				// Link to the account page rather than wp-admin: logged-out
+				// recipients would otherwise land on the stock WordPress login
+				// form. The account page shows a review link to capable users.
+				$body .= '<p><a href="' . esc_url( FEUR_Page_Installer::get_url() ) . '">' . esc_html__( 'Sign in to review the pending registration', 'feur' ) . '</a></p>';
 			}
 			foreach ( self::admin_recipients() as $recipient ) {
 				self::email( $recipient, $subject, $body );
@@ -183,6 +230,11 @@ class FEUR_Approval {
 	}
 
 	private static function email( $to, $subject, $body ) {
-		return wp_mail( $to, $subject, $body, array( 'Content-Type: text/html; charset=UTF-8' ) );
+		self::$sending = true;
+		try {
+			return wp_mail( $to, $subject, $body, array( 'Content-Type: text/html; charset=UTF-8' ) );
+		} finally {
+			self::$sending = false;
+		}
 	}
 }
