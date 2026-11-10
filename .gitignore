@@ -13,3 +13,6 @@ AGENTS.md
 # Screenshots and scratch files
 reorder_meta.png
 *.png
+
+# Local test site
+.test-site/
