@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Contact Form 7 Submissions
  * Description: Saves Contact Form 7 submissions to the database with an admin list, detail view and CSV export.
- * Version:     1.1.2
+ * Version:     1.1.4
  * Author:      Contact Form 7 Submissions
  * License:     GPL-2.0-or-later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -13,7 +13,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'CF7S_VERSION', '1.1.2' );
+define( 'CF7S_VERSION', '1.1.4' );
 define( 'CF7S_FILE', __FILE__ );
 define( 'CF7S_PATH', plugin_dir_path( __FILE__ ) );
 define( 'CF7S_URL', plugin_dir_url( __FILE__ ) );

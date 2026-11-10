@@ -7,16 +7,19 @@ class CF7S_Admin {
 	const PER_PAGE = 20;
 
 	public function __construct() {
-		add_action( 'admin_menu', array( $this, 'menu' ) );
+		add_action( 'admin_menu', array( $this, 'menu' ), 20 );
 		add_action( 'admin_init', array( $this, 'maybe_upgrade_db' ) );
 		add_action( 'admin_post_cf7s_delete', array( $this, 'handle_delete' ) );
 		add_action( 'admin_post_cf7s_bulk_delete', array( $this, 'handle_bulk_delete' ) );
 		add_action( 'admin_init', array( $this, 'handle_export' ) );
+		// Summary card on both dashboards: Contact Form 7's own, and the main
+		// WordPress dashboard, which is the only one some roles can reach.
 		add_action( 'wpcf7_dashboard_setup', array( $this, 'dashboard_widget' ) );
+		add_action( 'wp_dashboard_setup', array( $this, 'dashboard_widget' ) );
 	}
 
 	public function dashboard_widget() {
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! current_user_can( CF7S_Plugin::CAP ) ) {
 			return;
 		}
 
@@ -79,23 +82,43 @@ class CF7S_Admin {
 	}
 
 	public function menu() {
+		if ( ! current_user_can( CF7S_Plugin::CAP ) ) {
+			return;
+		}
+
 		// Contact Form 7 6.2 moved its top-level admin menu from "wpcf7" to "wpcf7-dashboard".
 		$parent = ( defined( 'WPCF7_VERSION' ) && version_compare( WPCF7_VERSION, '6.2', '>=' ) )
 			? 'wpcf7-dashboard'
 			: 'wpcf7';
 
-		add_submenu_page(
-			$parent,
+		// Administrators keep Submissions under Contact Form 7. Other roles get
+		// their own top-level menu: the CF7 menu is not theirs to see, and a
+		// submenu of a hidden parent would be unreachable.
+		if ( current_user_can( 'manage_options' ) ) {
+			add_submenu_page(
+				$parent,
+				__( 'Submissions', 'cf7s' ),
+				__( 'Submissions', 'cf7s' ),
+				CF7S_Plugin::CAP,
+				self::PAGE,
+				array( $this, 'render' )
+			);
+			return;
+		}
+
+		add_menu_page(
 			__( 'Submissions', 'cf7s' ),
 			__( 'Submissions', 'cf7s' ),
-			'manage_options',
+			CF7S_Plugin::CAP,
 			self::PAGE,
-			array( $this, 'render' )
+			array( $this, 'render' ),
+			'dashicons-email-alt',
+			27
 		);
 	}
 
 	public function render() {
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! current_user_can( CF7S_Plugin::CAP ) ) {
 			return;
 		}
 
@@ -252,7 +275,7 @@ class CF7S_Admin {
 	}
 
 	public function handle_delete() {
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! current_user_can( CF7S_Plugin::CAP ) ) {
 			wp_die( esc_html__( 'You do not have permission to do this.', 'cf7s' ) );
 		}
 		$id = ! empty( $_GET['id'] ) ? absint( $_GET['id'] ) : 0;
@@ -263,7 +286,7 @@ class CF7S_Admin {
 	}
 
 	public function handle_bulk_delete() {
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! current_user_can( CF7S_Plugin::CAP ) ) {
 			wp_die( esc_html__( 'You do not have permission to do this.', 'cf7s' ) );
 		}
 		check_admin_referer( 'cf7s_bulk_delete' );
@@ -279,7 +302,7 @@ class CF7S_Admin {
 		if ( empty( $_GET['cf7s_export'] ) ) {
 			return;
 		}
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! current_user_can( CF7S_Plugin::CAP ) ) {
 			wp_die( esc_html__( 'You do not have permission to do this.', 'cf7s' ) );
 		}
 		check_admin_referer( 'cf7s_export' );

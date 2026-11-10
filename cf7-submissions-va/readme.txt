@@ -5,7 +5,7 @@ Requires at least: 5.8
 Tested up to: 6.6
 Requires PHP: 7.4
 Requires Plugins: contact-form-7
-Stable tag: 1.1.2
+Stable tag: 1.1.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -45,6 +45,14 @@ Yes. The Submissions screen has an "Export CSV" button that exports all data for
 In a dedicated database table (`cf7s_submissions`). Deleting the plugin removes the table and its data.
 
 == Changelog ==
+
+= 1.1.4 =
+* The submissions summary card now appears on the main WordPress dashboard as well as the Contact Form 7 dashboard, so roles that cannot reach the CF7 dashboard still see it.
+* Submissions is registered as a top-level menu for users who are not administrators, instead of a submenu of the Contact Form 7 menu that may be hidden from them. Administrators keep it under Contact Form 7.
+
+= 1.1.3 =
+* Submissions now require the dedicated `cf7s_view_submissions` capability instead of site-administration rights, so other roles can be given access without plugin, theme or settings privileges. Administrators are granted it automatically on update.
+* The Submissions page falls back to its own top-level menu when the Contact Form 7 menu is not available to the current user, instead of being unreachable.
 
 = 1.1.2 =
 * The Submissions card on the Contact Form 7 Dashboard now appears at the top of the left column by default.
