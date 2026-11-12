@@ -7,20 +7,34 @@ A collection of WordPress plugins.
 ### Frontend User Registration
 Self-service frontend registration, login and user profile management with approval workflow, custom roles, email notification, magic login links and member-only access controls.
 
+- Auto-created `/account` page with Login and Register tabs; members never need wp-admin
+- Two-step magic links: the emailed link opens a "Confirm sign in" page, so email gateways and link scanners cannot use up the single-use token
+- Front-end profile editor for name and custom fields, with the login email read-only
+- Admin approval workflow with single-use, expiring login links and a configurable sender address
+- Members Manager role: approve, deny, edit members, manage Resources and Pages, without site-admin access
+- Logged-in navigation switches automatically: Join becomes "My Account" and the Login link is hidden
+- Members-only access control per post type, with non-members redirected to the account page
+
 ### Resources Library
 A "Resources" custom post type with section tags and an AJAX-driven, filterable library page template (Video | Link | Article).
 
 Features include:
 
 - Filterable resource grid with format chips, tag/section navigation and a hierarchical sidebar
+- Sort by newest, title or recently updated, with a configurable default
 - Video lightbox playback (YouTube, Vimeo and direct files) from cards and single pages
 - Featured resources, member Favourites, and share buttons
 - Animated filtering with slide in/out transitions
 - Drag-and-drop section ordering (Resources -> Reorder Sections)
+- Featured toggle and section reordering follow resource edit rights, so content roles can use them
 - Members-only support via the Frontend User Registration plugin
 
 ### Contact Form 7 Submissions
-Saves Contact Form 7 submissions to the database with an admin list under Contact -> Submissions, a detail view, CSV export and a summary card on the Contact Form 7 Dashboard. Supports Contact Form 7 6.2+.
+Saves Contact Form 7 submissions to the database with a list, detail view and CSV export. Supports Contact Form 7 6.2+.
+
+- Submissions screen sits under Contact Form 7 for administrators, and as its own menu for roles without CF7 access
+- Summary card on both the WordPress dashboard and the Contact Form 7 dashboard
+- Access is controlled by a dedicated `cf7s_view_submissions` capability, so Members Managers can read submissions without site-administration rights
 
 ### Guest Authors
 Attribute posts to one or more guest author identities without creating WordPress users. Guest authors are a custom post type with their own profile, archive and single pages; the real staff user stays the post author and only the public byline is swapped.

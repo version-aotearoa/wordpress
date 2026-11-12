@@ -34,6 +34,8 @@ class FEUR_Shortcode {
 		nocache_headers();
 		header( 'Cache-Control: no-store, no-cache, must-revalidate, max-age=0' );
 		header( 'Pragma: no-cache' );
+		// Magic link tokens travel in the query string; never leak them onward.
+		header( 'Referrer-Policy: no-referrer' );
 	}
 
 	public function assets() {
@@ -49,6 +51,11 @@ class FEUR_Shortcode {
 	public function account_form( $atts = array() ) {
 		if ( is_user_logged_in() ) {
 			return $this->logged_in_panel();
+		}
+
+		$confirm = $this->confirm_panel();
+		if ( '' !== $confirm ) {
+			return $confirm;
 		}
 		$state = $this->get_state();
 		$requested = isset( $_GET['tab'] ) ? sanitize_key( wp_unslash( $_GET['tab'] ) ) : '';
@@ -190,6 +197,51 @@ class FEUR_Shortcode {
 		return '<p><a href="' . esc_url( admin_url( 'post-new.php?post_type=resource' ) ) . '">' . esc_html__( 'Add resource', 'feur' ) . '</a> &middot; <a href="' . esc_url( admin_url( 'edit.php?post_type=resource' ) ) . '">' . esc_html__( 'Manage resources', 'feur' ) . '</a></p>';
 	}
 
+	/**
+	 * Two-step sign in: the emailed link opens this panel and the token is only
+	 * consumed by the form below. Keeping the GET inert is what stops email
+	 * scanners from burning one-time links. See docs/magic-link-confirm.md.
+	 */
+	private function confirm_panel() {
+		if ( ! isset( $_GET['fe_auth'], $_GET['fe_token'] ) ) {
+			return '';
+		}
+
+		$user_id = absint( wp_unslash( $_GET['fe_auth'] ) );
+		$token   = sanitize_text_field( wp_unslash( $_GET['fe_token'] ) );
+		if ( ! $user_id || '' === $token ) {
+			return '';
+		}
+
+		$redirect = isset( $_GET['redirect_to'] ) ? esc_url_raw( wp_unslash( $_GET['redirect_to'] ) ) : '';
+		$result   = FEUR_Magic_Link::check( $user_id, $token );
+
+		$html  = '<div class="feur-account feur-confirm">';
+		$html .= '<h2>' . esc_html__( 'Confirm sign in', 'feur' ) . '</h2>';
+
+		if ( ! $result instanceof WP_User ) {
+			$messages = $this->status_messages();
+			$message  = isset( $messages[ $result ] ) ? $messages[ $result ] : $messages['invalid_link'];
+			$html    .= '<div class="feur-notice feur-error">' . esc_html( $message ) . '</div>';
+			$html    .= '<p><a href="' . esc_url( FEUR_Page_Installer::account_url() ) . '">' . esc_html__( 'Get a new sign-in link', 'feur' ) . '</a></p>';
+			return $html . '</div>';
+		}
+
+		$html .= '<p>' . esc_html__( 'Press the button to finish signing in. This link works once.', 'feur' ) . '</p>';
+		$html .= '<form method="post" class="feur-form feur-confirm-form" action="' . esc_url( FEUR_Page_Installer::account_url() ) . '">';
+		$html .= '<input type="hidden" name="fe_confirm" value="1">';
+		$html .= '<input type="hidden" name="fe_auth" value="' . esc_attr( $user_id ) . '">';
+		$html .= '<input type="hidden" name="fe_token" value="' . esc_attr( $token ) . '">';
+		if ( $redirect ) {
+			$html .= '<input type="hidden" name="redirect_to" value="' . esc_attr( $redirect ) . '">';
+		}
+		$html .= '<p><button type="submit" class="feur-button">' . esc_html__( 'Sign in', 'feur' ) . '</button></p>';
+		$html .= '</form>';
+		$html .= '</div>';
+
+		return $html;
+	}
+
 	private function login_form() {
 		$redirect = isset( $_GET['redirect_to'] ) ? esc_url_raw( wp_unslash( $_GET['redirect_to'] ) ) : '';
 		$html = '<form method="post" class="feur-form feur-login-form" action="' . esc_url( $this->form_action() ) . '">';
@@ -260,7 +312,17 @@ class FEUR_Shortcode {
 			return $html;
 		}
 		$status = sanitize_key( wp_unslash( $_GET['fe_status'] ) );
-		$messages = array(
+		$messages = $this->status_messages();
+		$error_statuses = array( 'invalid_link', 'invalid_email', 'invalid_token', 'profile_error' );
+		if ( isset( $messages[ $status ] ) ) {
+			$class = in_array( $status, $error_statuses, true ) ? 'feur-error' : 'feur-success';
+			$html .= '<div class="feur-notice ' . esc_attr( $class ) . '">' . esc_html( $messages[ $status ] ) . '</div>';
+		}
+		return $html;
+	}
+
+	private function status_messages() {
+		return array(
 			'pending'        => __( 'Your account has been created and is awaiting approval. You will receive an email with a login link once an administrator approves your membership.', 'feur' ) . ' ' . $this->spam_hint(),
 			'success'        => __( 'Your account has been created. You can now log in.', 'feur' ),
 			'link_sent'      => __( 'If an account exists for that email address, a login link has been sent.', 'feur' ) . ' ' . $this->spam_hint(),
@@ -274,12 +336,6 @@ class FEUR_Shortcode {
 			'profile_saved'  => __( 'Your profile has been updated.', 'feur' ),
 			'profile_error'  => __( 'Your profile could not be updated. Please try again.', 'feur' ),
 		);
-		$error_statuses = array( 'invalid_link', 'invalid_email', 'invalid_token', 'profile_error' );
-		if ( isset( $messages[ $status ] ) ) {
-			$class = in_array( $status, $error_statuses, true ) ? 'feur-error' : 'feur-success';
-			$html .= '<div class="feur-notice ' . esc_attr( $class ) . '">' . esc_html( $messages[ $status ] ) . '</div>';
-		}
-		return $html;
 	}
 
 	/**

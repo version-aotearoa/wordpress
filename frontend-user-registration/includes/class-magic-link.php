@@ -8,7 +8,7 @@ class FEUR_Magic_Link {
 
 	public static function init() {
 		add_action( 'template_redirect', array( __CLASS__, 'maybe_login' ) );
-		add_action( 'login_init', array( __CLASS__, 'maybe_login' ) );
+		add_action( 'login_init', array( __CLASS__, 'maybe_redirect_to_confirm' ) );
 		add_action( 'login_init', array( __CLASS__, 'maybe_route_login_screen' ) );
 		add_filter( 'authenticate', array( __CLASS__, 'block_pending_login' ), 30, 3 );
 		add_filter( 'logout_redirect', array( __CLASS__, 'maybe_logout_redirect' ), 99, 3 );
@@ -30,7 +30,9 @@ class FEUR_Magic_Link {
 		if ( $redirect ) {
 			$args['redirect_to'] = $redirect;
 		}
-		return add_query_arg( $args, wp_login_url() );
+		// Points at the confirmation page, not wp-login.php: the token is only
+		// consumed by the form on that page.
+		return add_query_arg( $args, FEUR_Page_Installer::account_url() );
 	}
 
 	public static function validate( $user_id, $token ) {
@@ -47,33 +49,88 @@ class FEUR_Magic_Link {
 		delete_user_meta( $user_id, self::EXPIRY_META );
 	}
 
+	/**
+	 * Two-step sign in. The emailed link only opens a confirmation page; the
+	 * token is consumed by an explicit form POST.
+	 *
+	 * Why: email gateways and corporate link scanners prefetch URLs, and a
+	 * one-time token consumed on GET would be burned before the member clicks.
+	 * Scanners do not submit forms, so POST is the signal that a human acted.
+	 * See docs/magic-link-confirm.md before changing this back to GET.
+	 */
 	public static function maybe_login() {
-		if ( ! isset( $_GET['fe_auth'] ) || ! isset( $_GET['fe_token'] ) ) {
+		if ( ! isset( $_SERVER['REQUEST_METHOD'] ) || 'POST' !== strtoupper( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) ) ) {
 			return;
 		}
-		$user_id = absint( $_GET['fe_auth'] );
-		$token = sanitize_text_field( wp_unslash( $_GET['fe_token'] ) );
+		if ( empty( $_POST['fe_confirm'] ) ) {
+			return;
+		}
+		if ( ! isset( $_POST['fe_auth'], $_POST['fe_token'] ) ) {
+			return;
+		}
+
+		$user_id = absint( $_POST['fe_auth'] );
+		$token   = sanitize_text_field( wp_unslash( $_POST['fe_token'] ) );
 		if ( ! $user_id || '' === $token ) {
 			return;
 		}
-		$user = get_user_by( 'id', $user_id );
-		if ( ! $user || get_user_meta( $user_id, 'fe_pending', true ) || get_user_meta( $user_id, 'fe_denied', true ) ) {
-			$status = get_user_meta( $user_id, 'fe_denied', true ) ? 'denied' : 'pending_login';
-			wp_safe_redirect( add_query_arg( array( 'fe_status' => $status, 'fe_tab' => 'login' ), FEUR_Page_Installer::get_url() ) );
-			exit;
-		}
-		if ( ! self::validate( $user_id, $token ) ) {
-			wp_safe_redirect( add_query_arg( array( 'fe_status' => 'invalid_link', 'fe_tab' => 'login' ), FEUR_Page_Installer::get_url() ) );
-			exit;
-		}
-		delete_user_meta( $user_id, self::TOKEN_META );
-		delete_user_meta( $user_id, self::EXPIRY_META );
 
+		$result = self::check( $user_id, $token );
+		if ( ! $result instanceof WP_User ) {
+			wp_safe_redirect( add_query_arg( array( 'fe_status' => $result, 'fe_tab' => 'login' ), FEUR_Page_Installer::account_url() ) );
+			exit;
+		}
+
+		self::revoke( $user_id );
 		wp_set_current_user( $user_id );
 		wp_set_auth_cookie( $user_id, true );
 
-		$redirect = isset( $_GET['redirect_to'] ) ? wp_unslash( $_GET['redirect_to'] ) : '';
+		$redirect = isset( $_POST['redirect_to'] ) ? wp_unslash( $_POST['redirect_to'] ) : '';
 		wp_safe_redirect( FEUR_Plugin::login_redirect( $redirect ) );
+		exit;
+	}
+
+	/**
+	 * Validate a token without consuming it.
+	 *
+	 * @return WP_User|string The user when the link is usable, otherwise a
+	 *                        status key understood by the account page.
+	 */
+	public static function check( $user_id, $token ) {
+		$user = get_user_by( 'id', $user_id );
+		if ( ! $user ) {
+			return 'invalid_link';
+		}
+		if ( get_user_meta( $user_id, 'fe_denied', true ) ) {
+			return 'denied';
+		}
+		if ( get_user_meta( $user_id, 'fe_pending', true ) ) {
+			return 'pending_login';
+		}
+		if ( ! self::validate( $user_id, $token ) ) {
+			return 'invalid_link';
+		}
+		return $user;
+	}
+
+	/**
+	 * A magic link that still points at wp-login.php (older emails, bookmarks)
+	 * is redirected to the confirmation page without consuming the token.
+	 */
+	public static function maybe_redirect_to_confirm() {
+		if ( ! isset( $_GET['fe_auth'], $_GET['fe_token'] ) ) {
+			return;
+		}
+
+		$args = array(
+			'fe_auth'  => absint( $_GET['fe_auth'] ),
+			'fe_token' => sanitize_text_field( wp_unslash( $_GET['fe_token'] ) ),
+		);
+		if ( ! empty( $_GET['redirect_to'] ) ) {
+			$args['redirect_to'] = wp_unslash( $_GET['redirect_to'] );
+		}
+
+		wp_safe_redirect( add_query_arg( $args, FEUR_Page_Installer::account_url() ) );
 		exit;
 	}
 
@@ -86,7 +143,8 @@ class FEUR_Magic_Link {
 	 * deliberately using the core form) is left alone.
 	 */
 	public static function maybe_route_login_screen() {
-		// Magic links carry their own params; maybe_login() handles those.
+		// Magic links carry their own params and are handled by
+		// maybe_redirect_to_confirm().
 		if ( isset( $_GET['fe_auth'], $_GET['fe_token'] ) ) {
 			return;
 		}

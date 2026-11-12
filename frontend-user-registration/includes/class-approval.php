@@ -196,7 +196,11 @@ class FEUR_Approval {
 		return array_values( array_unique( array_filter( $recipients, 'is_email' ) ) );
 	}
 
-	public static function send_magic_link_email( $user_id, $token, $redirect = '' ) {
+	/**
+	 * @param string $context 'approval' when sent on approval, 'request' when
+	 *                        the member asked for a sign-in link themselves.
+	 */
+	public static function send_magic_link_email( $user_id, $token, $redirect = '', $context = 'approval' ) {
 		if ( ! FEUR_Plugin::get_setting( 'magic_link_email_enabled', true ) ) {
 			return;
 		}
@@ -208,9 +212,16 @@ class FEUR_Approval {
 		$site_name = wp_specialchars_decode( get_bloginfo( 'name' ), ENT_QUOTES );
 		$subject = sprintf( __( '[%s] Your login link', 'feur' ), $site_name );
 		$body = '<p>' . sprintf( esc_html__( 'Hi %s,', 'feur' ), esc_html( $user->display_name ) ) . '</p>';
-		$body .= '<p>' . esc_html__( 'Your membership has been approved. Click the button below to log in:', 'feur' ) . '</p>';
-		$body .= '<p><a style="display:inline-block;background:#2271b1;color:#fff;padding:.6em 1.2em;text-decoration:none;border-radius:4px" href="' . esc_url( $link ) . '">' . esc_html__( 'Log in to your account', 'feur' ) . '</a></p>';
-		$body .= '<p><small>' . esc_html__( 'This link is single-use and will expire.', 'feur' ) . '</small></p>';
+
+		if ( 'request' === $context ) {
+			$intro = __( 'Here is the sign-in link you requested. Open it, then press "Sign in" on the page that opens to finish:', 'feur' );
+		} else {
+			$intro = __( 'Your membership has been approved. Open the link below, then press "Sign in" on the page that opens to finish:', 'feur' );
+		}
+
+		$body .= '<p>' . esc_html( $intro ) . '</p>';
+		$body .= '<p><a style="display:inline-block;background:#2271b1;color:#fff;padding:.6em 1.2em;text-decoration:none;border-radius:4px" href="' . esc_url( $link ) . '">' . esc_html__( 'Confirm sign in', 'feur' ) . '</a></p>';
+		$body .= '<p><small>' . esc_html__( 'The button opens a confirmation page, so email link scanners cannot use it up. This link is single-use and will expire.', 'feur' ) . '</small></p>';
 		self::email( $user->user_email, $subject, $body );
 	}
 

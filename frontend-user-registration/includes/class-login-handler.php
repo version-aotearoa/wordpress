@@ -38,7 +38,7 @@ class FEUR_Login_Handler {
 
 		$redirect = isset( $_POST['redirect_to'] ) ? wp_unslash( $_POST['redirect_to'] ) : '';
 		$token = FEUR_Magic_Link::issue( $user->ID );
-		FEUR_Approval::send_magic_link_email( $user->ID, $token, $redirect );
+		FEUR_Approval::send_magic_link_email( $user->ID, $token, $redirect, 'request' );
 
 		$this->redirect( 'link_sent' );
 	}

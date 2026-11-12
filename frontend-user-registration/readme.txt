@@ -4,7 +4,7 @@ Tags: registration, members, magic login, user fields
 Requires at least: 5.8
 Tested up to: 6.6
 Requires PHP: 7.4
-Stable tag: 1.1.22
+Stable tag: 1.2.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -59,6 +59,15 @@ Promote a member to Members Manager using "Promote to Manager" on the Members pa
 Yes. Under Members -> Registration -> Settings, enable the "Members only" toggle for any public post type. Non-members are redirected to the account page.
 
 == Changelog ==
+
+= 1.2.1 =
+* Requested sign-in links no longer say "Your membership has been approved." The email now has two intros: one for a link the member asked for, one for the approval email. Both keep the two-step confirmation wording.
+
+= 1.2.0 =
+* Magic links now take two clicks: the emailed link opens a "Confirm sign in" panel on the account page, and only pressing Sign in consumes the token. Email gateways and corporate link scanners prefetch URLs, which previously used up the single-use link before the member clicked it.
+* Existing links (including ones already sent and any pointing at wp-login.php) are redirected to the confirmation panel without being consumed.
+* The account page sends `Referrer-Policy: no-referrer` so a token in the URL is not leaked onward.
+* See docs/magic-link-confirm.md for the rule that a GET must never consume a token.
 
 = 1.1.22 =
 * "Edit your profile" on the account page is a plain link again. The button styling added for it has been removed, restoring the original appearance of the form buttons.
